@@ -30,13 +30,7 @@ export function DashboardPage() {
         <StatCard label="App income" value={compactMoney(yearIncome)} hint={`${year} total`} />
         <StatCard label="Collected" value={compactMoney(paid)} hint="Paid invoices" />
       </div>
-      <div className="rounded-2xl bg-white border border-[#DDE1E7] p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-[#171A1F]">{year} monthly trend</h2>
-          <p className="text-[11px] text-[#68707C]">Blue income · Sky users · Green subscriptions</p>
-        </div>
-        <TrendChart data={series} />
-      </div>
+      <TrendChart data={series} />
     </div>
   )
 }
