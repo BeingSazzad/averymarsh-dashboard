@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { ROUTES } from '../constants/routes'
 import { readSession } from '../hooks/useAuth'
@@ -10,18 +10,16 @@ import { Topbar } from '../components/layout/Topbar'
 export function PrivateRoute() {
   const dispatch = useAppDispatch()
   const session = useAppSelector((state) => state.platform.session)
+  const [bootSession] = useState(() => readSession())
+  const activeSession = session ?? bootSession
 
   useEffect(() => {
-    if (session) return
-    const stored = readSession()
-    if (stored) dispatch(setSession(stored))
-  }, [dispatch, session])
+    if (!session && bootSession) dispatch(setSession(bootSession))
+  }, [bootSession, dispatch, session])
 
-  if (!session && !readSession()) {
+  if (!activeSession) {
     return <Navigate to={ROUTES.login} replace />
   }
-
-  if (!session) return null
 
   return (
     <AppShell>

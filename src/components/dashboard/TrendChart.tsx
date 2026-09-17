@@ -19,9 +19,9 @@ interface TrendChartProps {
 
 export function TrendChart({ data, year }: TrendChartProps) {
   return (
-    <div className="panel p-5 md:p-6 fade-up">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <h2 className="text-lg font-bold text-[#171A1F] tracking-tight">{year} overview</h2>
+    <div className="panel p-5 md:p-6 fade-up h-full min-h-[480px] flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 shrink-0">
+        <h2 className="text-lg font-bold text-[#171A1F] tracking-tight leading-none">{year} overview</h2>
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-5 text-xs font-semibold">
             <span className="flex items-center gap-2 text-[#1677FF]">
@@ -37,7 +37,7 @@ export function TrendChart({ data, year }: TrendChartProps) {
         </div>
       </div>
 
-      <div className="h-[280px] w-full">
+      <div className="flex-1 min-h-[320px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>

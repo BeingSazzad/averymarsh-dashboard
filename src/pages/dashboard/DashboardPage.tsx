@@ -7,6 +7,7 @@ import { TopPlanCard } from '../../components/dashboard/TopPlanCard'
 import { AttentionList } from '../../components/dashboard/AttentionList'
 import { RecentPayments } from '../../components/dashboard/RecentPayments'
 import { yearSeries } from '../../lib/seed'
+import { buildPlanShares } from '../../lib/planShares'
 import { compactMoney, money } from '../../lib/utils'
 import { useAppSelector } from '../../store/hooks'
 
@@ -21,27 +22,7 @@ export function DashboardPage() {
     .filter((company) => company.status === 'active' || company.status === 'past_due')
     .reduce((sum, company) => sum + company.mrr, 0)
 
-  const topPlan = useMemo(() => {
-    const counts = new Map<string, number>()
-    for (const company of companies) {
-      counts.set(company.planId, (counts.get(company.planId) ?? 0) + 1)
-    }
-    let bestId = ''
-    let bestCount = 0
-    for (const [planId, count] of counts) {
-      if (count > bestCount) {
-        bestId = planId
-        bestCount = count
-      }
-    }
-    const plan = plans.find((item) => item.id === bestId)
-    return {
-      name: plan?.name ?? '—',
-      count: bestCount,
-      total: companies.length,
-      price: plan?.monthlyPrice,
-    }
-  }, [companies, plans])
+  const planUsage = useMemo(() => buildPlanShares(plans, companies), [plans, companies])
 
   return (
     <div className="flex flex-col gap-5 w-full">
@@ -72,14 +53,9 @@ export function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_280px] gap-3 items-stretch">
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-4 items-stretch">
         <TrendChart data={series} year={year} />
-        <TopPlanCard
-          name={topPlan.name}
-          count={topPlan.count}
-          total={topPlan.total}
-          price={topPlan.price}
-        />
+        <TopPlanCard shares={planUsage.shares} total={planUsage.total} />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
