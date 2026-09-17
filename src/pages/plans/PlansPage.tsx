@@ -3,25 +3,54 @@ import { Check } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Badge } from '../../components/shared/Badge'
 import { Button } from '../../components/ui/Button'
+import { FeatureListEditor } from '../../components/ui/FeatureListEditor'
 import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
-import { RichTextEditor } from '../../components/ui/RichTextEditor'
 import { money } from '../../lib/utils'
-import { featuresToHtml, htmlToFeatures } from '../../lib/planFeatures'
 import { deletePlan, upsertPlan } from '../../store/platformSlice'
 import { newPlan } from '../../lib/factories'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import type { Plan } from '../../types/common.types'
 
+function cleanFeatures(features: string[]) {
+  return features.map((item) => item.trim()).filter(Boolean).slice(0, 5)
+}
+
 export function PlansPage() {
   const plans = useAppSelector((state) => state.platform.plans)
+  const companies = useAppSelector((state) => state.platform.companies)
   const dispatch = useAppDispatch()
   const [draft, setDraft] = useState<Plan | null>(null)
-  const [featuresHtml, setFeaturesHtml] = useState('')
+  const [pendingDelete, setPendingDelete] = useState<Plan | null>(null)
+  const [error, setError] = useState('')
 
   const openDraft = (plan: Plan) => {
-    setDraft(plan)
-    setFeaturesHtml(featuresToHtml(plan.features))
+    setError('')
+    setDraft({
+      ...plan,
+      features: plan.features.length ? [...plan.features] : [''],
+    })
+  }
+
+  const saveDraft = () => {
+    if (!draft) return
+    if (!draft.name.trim()) {
+      setError('Enter a plan name.')
+      return
+    }
+    dispatch(
+      upsertPlan({
+        ...draft,
+        name: draft.name.trim(),
+        description: draft.description.trim(),
+        monthlyPrice: Number(draft.monthlyPrice) || 0,
+        yearlyPrice: Number(draft.yearlyPrice) || 0,
+        seats: Math.max(1, Number(draft.seats) || 1),
+        features: cleanFeatures(draft.features),
+      })
+    )
+    setDraft(null)
+    setError('')
   }
 
   return (
@@ -77,6 +106,9 @@ export function PlansPage() {
                     <span className="leading-snug">{feature}</span>
                   </li>
                 ))}
+                {plan.features.length === 0 ? (
+                  <li className="text-sm text-[#94A3B8]">No benefits yet</li>
+                ) : null}
               </ul>
             </div>
 
@@ -84,7 +116,7 @@ export function PlansPage() {
               <Button size="sm" variant="secondary" className="flex-1" onClick={() => openDraft(plan)}>
                 Edit
               </Button>
-              <Button size="sm" variant="danger" onClick={() => dispatch(deletePlan(plan.id))}>
+              <Button size="sm" variant="danger" onClick={() => setPendingDelete(plan)}>
                 Delete
               </Button>
             </div>
@@ -95,7 +127,10 @@ export function PlansPage() {
       <Modal
         title={draft && plans.some((plan) => plan.id === draft.id) ? 'Edit plan' : 'Add plan'}
         open={Boolean(draft)}
-        onClose={() => setDraft(null)}
+        onClose={() => {
+          setDraft(null)
+          setError('')
+        }}
         wide
       >
         {draft ? (
@@ -103,21 +138,18 @@ export function PlansPage() {
             className="flex flex-col gap-3"
             onSubmit={(event) => {
               event.preventDefault()
-              if (!draft.name.trim()) return
-              dispatch(
-                upsertPlan({
-                  ...draft,
-                  features: htmlToFeatures(featuresHtml),
-                })
-              )
-              setDraft(null)
+              saveDraft()
             }}
           >
             <Input
               label="Name"
               value={draft.name}
-              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              onChange={(e) => {
+                setError('')
+                setDraft({ ...draft, name: e.target.value })
+              }}
               placeholder="Plan name"
+              autoFocus
             />
             <Input
               label="Short description"
@@ -129,24 +161,31 @@ export function PlansPage() {
               <Input
                 label="Monthly $"
                 type="number"
+                min={0}
                 value={draft.monthlyPrice}
                 onChange={(e) => setDraft({ ...draft, monthlyPrice: Number(e.target.value) })}
               />
               <Input
                 label="Yearly $"
                 type="number"
+                min={0}
                 value={draft.yearlyPrice}
                 onChange={(e) => setDraft({ ...draft, yearlyPrice: Number(e.target.value) })}
               />
               <Input
                 label="Seats"
                 type="number"
+                min={1}
                 value={draft.seats}
                 onChange={(e) => setDraft({ ...draft, seats: Number(e.target.value) })}
               />
             </div>
-            <RichTextEditor label="Benefits" value={featuresHtml} onChange={setFeaturesHtml} />
-            <label className="flex items-center gap-2 text-sm">
+            <FeatureListEditor
+              value={draft.features}
+              onChange={(features) => setDraft({ ...draft, features })}
+              max={5}
+            />
+            <label className="flex items-center gap-2 text-sm font-medium text-[#171A1F]">
               <input
                 type="checkbox"
                 checked={draft.active}
@@ -154,8 +193,49 @@ export function PlansPage() {
               />
               Live
             </label>
-            <Button type="submit">Save plan</Button>
+            {error ? <p className="text-xs font-semibold text-[#E5484D]">{error}</p> : null}
+            <Button type="submit" className="w-full">
+              Save plan
+            </Button>
           </form>
+        ) : null}
+      </Modal>
+
+      <Modal
+        title="Delete plan"
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+      >
+        {pendingDelete ? (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-[#68707C] leading-relaxed">
+              Delete <span className="font-semibold text-[#171A1F]">{pendingDelete.name}</span>?
+              {(() => {
+                const onPlan = companies.filter((company) => company.planId === pendingDelete.id).length
+                if (onPlan === 0) return null
+                return (
+                  <>
+                    {' '}
+                    {onPlan} {onPlan === 1 ? 'company is' : 'companies are'} on this plan.
+                  </>
+                )
+              })()}
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setPendingDelete(null)}>
+                Keep
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => {
+                  dispatch(deletePlan(pendingDelete.id))
+                  setPendingDelete(null)
+                }}
+              >
+                Delete plan
+              </Button>
+            </div>
+          </div>
         ) : null}
       </Modal>
     </div>
