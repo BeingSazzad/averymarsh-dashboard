@@ -27,19 +27,28 @@ export const seedPlans: Plan[] = [
 ]
 
 export const seedCompanies: Company[] = [
-  { id: 'co-1', name: 'Avery & Marsh Construction', planId: 'plan-company', seats: 42, status: 'active', mrr: 249, joined: '2024-03-12' },
-  { id: 'co-2', name: 'Harborview Builders', planId: 'plan-crew', seats: 18, status: 'active', mrr: 129, joined: '2024-07-02' },
-  { id: 'co-3', name: 'Snell Isle Residences LLC', planId: 'plan-crew', seats: 11, status: 'trial', mrr: 0, joined: '2026-08-21' },
-  { id: 'co-4', name: 'Ridge Line GC', planId: 'plan-field', seats: 6, status: 'past_due', mrr: 49, joined: '2025-01-18' },
-  { id: 'co-5', name: 'Metro Trust Projects', planId: 'plan-company', seats: 61, status: 'active', mrr: 249, joined: '2025-11-04' },
+  { id: 'co-1', name: 'Avery & Marsh Construction', planId: 'plan-company', seats: 42, people: 38, status: 'active', mrr: 249, joined: '2024-03-12', renewsOn: '2026-10-12' },
+  { id: 'co-2', name: 'Harborview Builders', planId: 'plan-crew', seats: 25, people: 16, status: 'active', mrr: 129, joined: '2024-07-02', renewsOn: '2026-10-02' },
+  { id: 'co-3', name: 'Snell Isle Residences LLC', planId: 'plan-crew', seats: 25, people: 8, status: 'trial', mrr: 0, joined: '2026-08-21', renewsOn: '2026-09-21' },
+  { id: 'co-4', name: 'Ridge Line GC', planId: 'plan-field', seats: 8, people: 5, status: 'past_due', mrr: 49, joined: '2025-01-18', renewsOn: '2026-08-18' },
+  { id: 'co-5', name: 'Metro Trust Projects', planId: 'plan-company', seats: 80, people: 54, status: 'active', mrr: 249, joined: '2025-11-04', renewsOn: '2026-11-04' },
 ]
 
 export const seedUsers: SeatUser[] = [
   { id: 'u-1', name: 'Avery Scott', email: 'avery@averymarsh.com', companyId: 'co-1', role: 'Owner', lastActive: '2026-09-17' },
   { id: 'u-2', name: 'Sarah Johnson', email: 'sarah@averymarsh.com', companyId: 'co-1', role: 'PM', lastActive: '2026-09-16' },
+  { id: 'u-6', name: 'Marcus Hale', email: 'marcus@averymarsh.com', companyId: 'co-1', role: 'Field', lastActive: '2026-09-15' },
+  { id: 'u-7', name: 'Nina Patel', email: 'nina@averymarsh.com', companyId: 'co-1', role: 'Finance', lastActive: '2026-09-14' },
   { id: 'u-3', name: 'John Smith', email: 'john@harborview.com', companyId: 'co-2', role: 'Field', lastActive: '2026-09-15' },
+  { id: 'u-8', name: 'Lisa Chen', email: 'lisa@harborview.com', companyId: 'co-2', role: 'PM', lastActive: '2026-09-16' },
+  { id: 'u-9', name: 'Omar Diaz', email: 'omar@harborview.com', companyId: 'co-2', role: 'Owner', lastActive: '2026-09-13' },
   { id: 'u-4', name: 'Elena Rossi', email: 'elena@snellisle.com', companyId: 'co-3', role: 'Owner', lastActive: '2026-09-14' },
+  { id: 'u-10', name: 'Tom Briggs', email: 'tom@snellisle.com', companyId: 'co-3', role: 'Field', lastActive: '2026-09-12' },
+  { id: 'u-11', name: 'Dana Cole', email: 'dana@ridgeline.com', companyId: 'co-4', role: 'Owner', lastActive: '2026-09-10' },
+  { id: 'u-12', name: 'Will Park', email: 'will@ridgeline.com', companyId: 'co-4', role: 'Field', lastActive: '2026-09-08' },
   { id: 'u-5', name: 'Michael Chang', email: 'mike@metrotrust.com', companyId: 'co-5', role: 'Finance', lastActive: '2026-09-17' },
+  { id: 'u-13', name: 'Grace Liu', email: 'grace@metrotrust.com', companyId: 'co-5', role: 'PM', lastActive: '2026-09-16' },
+  { id: 'u-14', name: 'Chris Webb', email: 'chris@metrotrust.com', companyId: 'co-5', role: 'Owner', lastActive: '2026-09-17' },
 ]
 
 export const seedInvoices: Invoice[] = [

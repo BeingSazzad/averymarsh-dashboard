@@ -1,12 +1,18 @@
 import { useMemo, useState } from 'react'
 import { PageHeader } from '../../components/layout/PageHeader'
+import { Avatar } from '../../components/shared/Avatar'
+import { Badge } from '../../components/shared/Badge'
+import { CompanyMark } from '../../components/shared/CompanyMark'
 import { Input } from '../../components/ui/Input'
+import { Table, Td, Th } from '../../components/ui/Table'
 import { useDebounce } from '../../hooks/useDebounce'
+import { formatDate } from '../../lib/utils'
 import { useAppSelector } from '../../store/hooks'
 
 export function UsersPage() {
   const users = useAppSelector((state) => state.platform.users)
   const companies = useAppSelector((state) => state.platform.companies)
+  const people = companies.reduce((sum, company) => sum + company.people, 0)
   const [query, setQuery] = useState('')
   const q = useDebounce(query)
 
@@ -15,43 +21,71 @@ export function UsersPage() {
     return users.filter((user) =>
       !needle
         ? true
-        : user.name.toLowerCase().includes(needle) || user.email.toLowerCase().includes(needle)
+        : user.name.toLowerCase().includes(needle) ||
+          user.email.toLowerCase().includes(needle) ||
+          (companies.find((company) => company.id === user.companyId)?.name ?? '')
+            .toLowerCase()
+            .includes(needle)
     )
-  }, [users, q])
+  }, [users, q, companies])
 
   return (
-    <div>
-      <PageHeader title="Users" subtitle={`${users.length} seats across companies`} />
-      <div className="max-w-sm mb-4">
-        <Input placeholder="Search name or email" value={query} onChange={(e) => setQuery(e.target.value)} />
-      </div>
-      <div className="rounded-2xl bg-white border border-[#DDE1E7] overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-[#F2F2F7] text-[#68707C] text-xs uppercase tracking-wider">
-            <tr>
-              <th className="text-left font-semibold px-4 py-3">User</th>
-              <th className="text-left font-semibold px-4 py-3">Company</th>
-              <th className="text-left font-semibold px-4 py-3">Role</th>
-              <th className="text-left font-semibold px-4 py-3">Last active</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((user) => (
-              <tr key={user.id} className="border-t border-[#EAEDF1]">
-                <td className="px-4 py-3">
-                  <p className="font-semibold text-[#171A1F]">{user.name}</p>
-                  <p className="text-xs text-[#68707C]">{user.email}</p>
-                </td>
-                <td className="px-4 py-3 text-[#68707C]">
-                  {companies.find((company) => company.id === user.companyId)?.name ?? '—'}
-                </td>
-                <td className="px-4 py-3">{user.role}</td>
-                <td className="px-4 py-3 text-[#68707C]">{user.lastActive}</td>
+    <div className="flex flex-col gap-5 max-w-[1280px]">
+      <PageHeader
+        title="Users"
+        subtitle={`${people} people on tenants · ${users.length} in this directory`}
+        action={
+          <div className="w-72">
+            <Input placeholder="Search name, email, company" value={query} onChange={(e) => setQuery(e.target.value)} />
+          </div>
+        }
+      />
+      <Table>
+        <thead>
+          <tr>
+            <Th>Person</Th>
+            <Th>Company</Th>
+            <Th>Role</Th>
+            <Th>Last active</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((user) => {
+            const company = companies.find((item) => item.id === user.companyId)
+            return (
+              <tr key={user.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
+                <Td>
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      src=""
+                      name={user.name}
+                      size={36}
+                    />
+                    <div>
+                      <p className="font-semibold text-[#171A1F]">{user.name}</p>
+                      <p className="text-xs text-[#68707C] mt-0.5">{user.email}</p>
+                    </div>
+                  </div>
+                </Td>
+                <Td>
+                  {company ? (
+                    <div className="flex items-center gap-2.5">
+                      <CompanyMark name={company.name} size={28} />
+                      <span className="text-[#68707C] font-medium">{company.name}</span>
+                    </div>
+                  ) : (
+                    '—'
+                  )}
+                </Td>
+                <Td>
+                  <Badge tone="slate">{user.role}</Badge>
+                </Td>
+                <Td className="text-[#68707C]">{formatDate(user.lastActive)}</Td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            )
+          })}
+        </tbody>
+      </Table>
     </div>
   )
 }

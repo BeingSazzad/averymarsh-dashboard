@@ -26,7 +26,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-xl flex flex-col gap-4">
       <PageHeader title="Your profile" subtitle="Photo, name, and password" />
       <div className="rounded-2xl bg-white border border-[#DDE1E7] p-5 flex flex-col gap-5">
         <div className="flex items-center gap-4">

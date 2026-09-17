@@ -1,36 +1,68 @@
+import { AlertTriangle, Building2, Users, Wallet } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { StatCard } from '../../components/dashboard/StatCard'
 import { TrendChart } from '../../components/dashboard/TrendChart'
 import { YearFilter } from '../../components/dashboard/YearFilter'
+import { AttentionList } from '../../components/dashboard/AttentionList'
+import { RecentPayments } from '../../components/dashboard/RecentPayments'
 import { yearSeries } from '../../lib/seed'
-import { compactMoney } from '../../lib/utils'
+import { compactMoney, money } from '../../lib/utils'
 import { useAppSelector } from '../../store/hooks'
 
 export function DashboardPage() {
   const year = useAppSelector((state) => state.platform.year)
   const companies = useAppSelector((state) => state.platform.companies)
-  const users = useAppSelector((state) => state.platform.users)
-  const invoices = useAppSelector((state) => state.platform.invoices)
   const series = yearSeries(year)
-  const last = series[series.length - 1]
   const yearIncome = series.reduce((sum, point) => sum + point.income, 0)
-  const activeSubs = companies.filter((company) => company.status === 'active' || company.status === 'past_due').length
-  const paid = invoices.filter((invoice) => invoice.status === 'paid').reduce((sum, invoice) => sum + invoice.amount, 0)
+  const liveSubs = companies.filter((company) => company.status === 'active').length
+  const people = companies.reduce((sum, company) => sum + company.people, 0)
+  const atRisk = companies.filter((company) => company.status === 'past_due' || company.status === 'trial').length
+  const mrr = companies.reduce((sum, company) => sum + company.mrr, 0)
 
   return (
-    <div>
+    <div className="flex flex-col gap-5 max-w-[1280px]">
       <PageHeader
         title="Overview"
-        subtitle={`${year} · 12-month users, subscriptions, and app income`}
+        subtitle={`${year} platform health · ${money(mrr)} MRR`}
         action={<YearFilter />}
       />
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
-        <StatCard label="Users" value={String(last.users)} hint={`${users.length} in tenant list`} />
-        <StatCard label="Subscriptions" value={String(last.subscriptions)} hint={`${activeSubs} companies on a plan`} />
-        <StatCard label="App income" value={compactMoney(yearIncome)} hint={`${year} total`} />
-        <StatCard label="Collected" value={compactMoney(paid)} hint="Paid invoices" />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        <StatCard
+          label="App income"
+          value={compactMoney(yearIncome)}
+          hint={`${year} collected potential`}
+          icon={<Wallet className="w-[18px] h-[18px]" strokeWidth={1.9} />}
+        />
+        <StatCard
+          label="Live companies"
+          value={String(liveSubs)}
+          hint={`${companies.length} total tenants`}
+          icon={<Building2 className="w-[18px] h-[18px]" strokeWidth={1.9} />}
+          accent="ink"
+        />
+        <StatCard
+          label="People"
+          value={String(people)}
+          hint="Employees across companies"
+          icon={<Users className="w-[18px] h-[18px]" strokeWidth={1.9} />}
+          accent="ink"
+        />
+        <StatCard
+          label="Needs action"
+          value={String(atRisk)}
+          hint="Trial or past due"
+          icon={<AlertTriangle className="w-[18px] h-[18px]" strokeWidth={1.9} />}
+          accent="amber"
+        />
       </div>
-      <TrendChart data={series} />
+
+      <TrendChart data={series} year={year} />
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+        <AttentionList />
+        <RecentPayments />
+      </div>
     </div>
   )
 }

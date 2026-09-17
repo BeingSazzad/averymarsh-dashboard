@@ -3,10 +3,11 @@ import { classNames } from '../../lib/utils'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
+  size?: 'md' | 'sm'
   children: ReactNode
 }
 
-export function Button({ variant = 'primary', className, children, ...props }: ButtonProps) {
+export function Button({ variant = 'primary', size = 'md', className, children, ...props }: ButtonProps) {
   const styles = {
     primary: 'bg-[#1677FF] text-white hover:bg-[#0F5FD7]',
     secondary: 'bg-white text-[#171A1F] border border-[#DDE1E7] hover:bg-[#F2F2F7]',
@@ -17,7 +18,8 @@ export function Button({ variant = 'primary', className, children, ...props }: B
   return (
     <button
       className={classNames(
-        'h-10 px-4 rounded-xl text-sm font-semibold cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center gap-2 rounded-xl font-semibold cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
+        size === 'sm' ? 'h-8 px-3 text-xs' : 'h-10 px-4 text-sm',
         styles,
         className
       )}

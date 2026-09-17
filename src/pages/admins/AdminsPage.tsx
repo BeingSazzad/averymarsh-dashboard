@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
+import { Table, Td, Th } from '../../components/ui/Table'
 import { deleteAdmin, newAdmin, upsertAdmin } from '../../store/platformSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import type { Admin } from '../../types/common.types'
@@ -18,51 +19,53 @@ export function AdminsPage() {
   const [draft, setDraft] = useState<Admin | null>(null)
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <PageHeader
         title="Admins"
-        subtitle="People who can operate this dashboard"
+        subtitle="People who operate this dashboard"
         action={<Button onClick={() => setDraft(newAdmin())}>Add admin</Button>}
       />
-      <div className="rounded-2xl bg-white border border-[#DDE1E7] overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-[#F2F2F7] text-[#68707C] text-xs uppercase tracking-wider">
-            <tr>
-              <th className="text-left font-semibold px-4 py-3">Admin</th>
-              <th className="text-left font-semibold px-4 py-3">Role</th>
-              <th className="text-left font-semibold px-4 py-3">Status</th>
-              <th className="text-right font-semibold px-4 py-3"> </th>
+      <Table>
+        <thead>
+          <tr>
+            <Th>Admin</Th>
+            <Th>Role</Th>
+            <Th>Status</Th>
+            <Th className="text-right">Actions</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {admins.map((admin) => (
+            <tr key={admin.id} className="hover:bg-[#F8FAFC]">
+              <Td>
+                <div className="flex items-center gap-3">
+                  <Avatar src={admin.avatar} name={admin.name} />
+                  <div>
+                    <p className="font-semibold text-[#171A1F]">{admin.name}</p>
+                    <p className="text-xs text-[#68707C] mt-0.5">{admin.email}</p>
+                  </div>
+                </div>
+              </Td>
+              <Td>{admin.role}</Td>
+              <Td>
+                <Badge tone={admin.status === 'active' ? 'green' : 'blue'}>{admin.status}</Badge>
+              </Td>
+              <Td>
+                <div className="flex justify-end gap-2">
+                  <Button size="sm" variant="secondary" onClick={() => setDraft(admin)}>
+                    Edit
+                  </Button>
+                  <PermissionGate allow={admin.id !== session?.id}>
+                    <Button size="sm" variant="danger" onClick={() => dispatch(deleteAdmin(admin.id))}>
+                      Delete
+                    </Button>
+                  </PermissionGate>
+                </div>
+              </Td>
             </tr>
-          </thead>
-          <tbody>
-            {admins.map((admin) => (
-              <tr key={admin.id} className="border-t border-[#EAEDF1]">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar src={admin.avatar} name={admin.name} />
-                    <div>
-                      <p className="font-semibold text-[#171A1F]">{admin.name}</p>
-                      <p className="text-xs text-[#68707C]">{admin.email}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3">{admin.role}</td>
-                <td className="px-4 py-3">
-                  <Badge tone={admin.status === 'active' ? 'green' : 'blue'}>{admin.status}</Badge>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="secondary" onClick={() => setDraft(admin)}>Edit</Button>
-                    <PermissionGate allow={admin.id !== session?.id}>
-                      <Button variant="danger" onClick={() => dispatch(deleteAdmin(admin.id))}>Delete</Button>
-                    </PermissionGate>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </Table>
 
       <Modal title="Admin" open={Boolean(draft)} onClose={() => setDraft(null)}>
         {draft ? (

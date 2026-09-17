@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { uid } from '../lib/utils'
+import { addOneYear, uid } from '../lib/utils'
 import {
   seedAdmins,
   seedCompanies,
@@ -90,6 +90,26 @@ const platformSlice = createSlice({
     deleteAdmin(state, action: PayloadAction<string>) {
       state.admins = state.admins.filter((admin) => admin.id !== action.payload)
     },
+    renameCompany(state, action: PayloadAction<{ id: string; name: string }>) {
+      const company = state.companies.find((item) => item.id === action.payload.id)
+      if (!company) return
+      const next = action.payload.name.trim()
+      if (!next) return
+      company.name = next
+    },
+    renewCompany(state, action: PayloadAction<string>) {
+      const company = state.companies.find((item) => item.id === action.payload)
+      if (!company) return
+      const plan = state.plans.find((item) => item.id === company.planId)
+      company.status = 'active'
+      company.mrr = plan?.monthlyPrice ?? company.mrr
+      company.renewsOn = addOneYear(company.renewsOn)
+    },
+    deleteCompany(state, action: PayloadAction<string>) {
+      state.companies = state.companies.filter((company) => company.id !== action.payload)
+      state.users = state.users.filter((user) => user.companyId !== action.payload)
+      state.invoices = state.invoices.filter((invoice) => invoice.companyId !== action.payload)
+    },
   },
 })
 
@@ -104,6 +124,9 @@ export const {
   saveLegal,
   upsertAdmin,
   deleteAdmin,
+  renameCompany,
+  renewCompany,
+  deleteCompany,
 } = platformSlice.actions
 
 export const platformReducer = platformSlice.reducer

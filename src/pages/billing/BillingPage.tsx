@@ -1,50 +1,43 @@
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Badge } from '../../components/shared/Badge'
-import { money } from '../../lib/utils'
+import { Table, Td, Th } from '../../components/ui/Table'
+import { invoiceTone } from '../../lib/status'
+import { formatDate, money } from '../../lib/utils'
 import { useAppSelector } from '../../store/hooks'
-import type { InvoiceStatus } from '../../types/common.types'
-
-function tone(status: InvoiceStatus) {
-  if (status === 'paid') return 'green' as const
-  if (status === 'open') return 'blue' as const
-  return 'red' as const
-}
 
 export function BillingPage() {
   const invoices = useAppSelector((state) => state.platform.invoices)
   const companies = useAppSelector((state) => state.platform.companies)
 
   return (
-    <div>
-      <PageHeader title="Billing" subtitle="Payment history from the Lattice app" />
-      <div className="rounded-2xl bg-white border border-[#DDE1E7] overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-[#F2F2F7] text-[#68707C] text-xs uppercase tracking-wider">
-            <tr>
-              <th className="text-left font-semibold px-4 py-3">Invoice</th>
-              <th className="text-left font-semibold px-4 py-3">Company</th>
-              <th className="text-left font-semibold px-4 py-3">Amount</th>
-              <th className="text-left font-semibold px-4 py-3">Date</th>
-              <th className="text-left font-semibold px-4 py-3">Status</th>
+    <div className="flex flex-col gap-4">
+      <PageHeader title="Billing" subtitle="Invoices from Lattice subscriptions" />
+      <Table>
+        <thead>
+          <tr>
+            <Th>Invoice</Th>
+            <Th>Company</Th>
+            <Th>Amount</Th>
+            <Th>Date</Th>
+            <Th>Status</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {invoices.map((invoice) => (
+            <tr key={invoice.id} className="hover:bg-[#F8FAFC]">
+              <Td className="font-semibold">{invoice.id}</Td>
+              <Td className="text-[#68707C]">
+                {companies.find((company) => company.id === invoice.companyId)?.name ?? '—'}
+              </Td>
+              <Td className="font-semibold tabular-nums">{money(invoice.amount)}</Td>
+              <Td className="text-[#68707C]">{formatDate(invoice.date)}</Td>
+              <Td>
+                <Badge tone={invoiceTone(invoice.status)}>{invoice.status}</Badge>
+              </Td>
             </tr>
-          </thead>
-          <tbody>
-            {invoices.map((invoice) => (
-              <tr key={invoice.id} className="border-t border-[#EAEDF1]">
-                <td className="px-4 py-3 font-semibold">{invoice.id}</td>
-                <td className="px-4 py-3 text-[#68707C]">
-                  {companies.find((company) => company.id === invoice.companyId)?.name ?? '—'}
-                </td>
-                <td className="px-4 py-3">{money(invoice.amount)}</td>
-                <td className="px-4 py-3 text-[#68707C]">{invoice.date}</td>
-                <td className="px-4 py-3">
-                  <Badge tone={tone(invoice.status)}>{invoice.status}</Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </Table>
     </div>
   )
 }

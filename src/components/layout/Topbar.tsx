@@ -1,38 +1,59 @@
-import { Bell, Search } from 'lucide-react'
+import { Bell, ChevronDown, Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
-import { useAuth } from '../../hooks/useAuth'
+import { useAppSelector } from '../../store/hooks'
 import { Avatar } from '../shared/Avatar'
-import { Button } from '../ui/Button'
 import { MobileNav } from './Sidebar'
 
 export function Topbar() {
-  const { session, logout } = useAuth()
+  const session = useAppSelector((state) => state.platform.session)
+  const atRisk = useAppSelector((state) =>
+    state.platform.companies.filter((company) => company.status === 'past_due' || company.status === 'trial').length
+  )
+
   return (
-    <header className="bg-white border-b border-[#DDE1E7]">
-      <div className="h-16 px-4 md:px-6 flex items-center gap-3">
-        <div className="flex-1 max-w-md relative">
-          <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
+    <header className="bg-white/90 backdrop-blur border-b border-[#EAEDF1] shrink-0">
+      <div className="h-[68px] px-4 md:px-6 flex items-center gap-4">
+        <div className="flex-1 max-w-lg relative">
+          <Search className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
-            placeholder="Search companies, users, invoices"
-            className="w-full h-10 rounded-xl border border-[#DDE1E7] bg-[#F2F2F7] pl-9 pr-3 text-sm outline-none focus:border-[#1677FF] focus:bg-white"
+            placeholder="Search companies, people, invoices…"
+            className="w-full h-11 rounded-2xl border border-[#DDE1E7] bg-[#F2F2F7]/80 pl-10 pr-4 text-sm outline-none focus:border-[#1677FF] focus:bg-white focus:ring-4 focus:ring-[#1677FF]/10 transition"
           />
         </div>
-        <button type="button" className="w-10 h-10 rounded-xl border border-[#DDE1E7] flex items-center justify-center text-[#171A1F] cursor-pointer">
-          <Bell className="w-4 h-4" />
-        </button>
-        {session ? (
-          <Link to={ROUTES.profile} className="flex items-center gap-2 min-w-0">
-            <Avatar src={session.avatar} name={session.name} />
-            <div className="hidden sm:block min-w-0">
-              <p className="text-sm font-semibold text-[#171A1F] truncate">{session.name}</p>
-              <p className="text-[11px] text-[#68707C] truncate">Profile</p>
-            </div>
+
+        <div className="ml-auto flex items-center gap-2.5">
+          <Link
+            to={ROUTES.companies}
+            className="relative w-11 h-11 rounded-2xl border border-[#DDE1E7] bg-white flex items-center justify-center text-[#171A1F] hover:bg-[#F2F2F7] transition"
+            aria-label="Alerts"
+          >
+            <Bell className="w-4 h-4" strokeWidth={1.9} />
+            {atRisk > 0 ? (
+              <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-[#1677FF] text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+                {atRisk}
+              </span>
+            ) : null}
           </Link>
-        ) : null}
-        <Button variant="secondary" onClick={logout}>
-          Sign out
-        </Button>
+
+          {session ? (
+            <Link
+              to={ROUTES.profile}
+              className="h-11 pl-1.5 pr-3 rounded-2xl border border-[#DDE1E7] bg-white flex items-center gap-2.5 min-w-0 hover:bg-[#F8FAFC] transition"
+            >
+              <Avatar src={session.avatar} name={session.name} size={32} />
+              <div className="hidden sm:block min-w-0 text-left">
+                <p className="text-sm font-semibold text-[#171A1F] truncate leading-tight max-w-[140px]">
+                  {session.name}
+                </p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] leading-tight">
+                  Admin
+                </p>
+              </div>
+              <ChevronDown className="hidden sm:block w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
+            </Link>
+          ) : null}
+        </div>
       </div>
       <MobileNav />
     </header>

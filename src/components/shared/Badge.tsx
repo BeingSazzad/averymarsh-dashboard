@@ -15,7 +15,7 @@ export function Badge({ tone = 'slate', children }: BadgeProps) {
   }[tone]
 
   return (
-    <span className={classNames('inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold', styles)}>
+    <span className={classNames('inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide', styles)}>
       {children}
     </span>
   )

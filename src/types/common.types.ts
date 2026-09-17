@@ -14,9 +14,11 @@ export interface Company {
   name: string
   planId: string
   seats: number
+  people: number
   status: CompanyStatus
   mrr: number
   joined: string
+  renewsOn: string
 }
 
 export interface SeatUser {

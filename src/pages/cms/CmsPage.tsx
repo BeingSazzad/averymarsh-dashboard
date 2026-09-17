@@ -21,16 +21,16 @@ export function CmsPage() {
   const privacy = legal.find((doc) => doc.id === 'privacy')
 
   return (
-    <div>
-      <PageHeader title="CMS" subtitle="FAQ, terms, and privacy shown to Lattice customers" />
-      <div className="flex gap-1 bg-[#EAEDF1] p-1 rounded-xl w-fit mb-4">
+    <div className="flex flex-col gap-4">
+      <PageHeader title="CMS" subtitle="FAQ, terms, and privacy shown to customers" />
+      <div className="flex gap-1 bg-[#EAEDF1] p-1 rounded-xl w-fit">
         {(['faq', 'terms', 'privacy'] as Tab[]).map((item) => (
           <button
             key={item}
             type="button"
             onClick={() => setTab(item)}
             className={classNames(
-              'h-9 px-3 rounded-lg text-xs font-semibold cursor-pointer capitalize',
+              'h-8 px-3 rounded-lg text-xs font-semibold cursor-pointer',
               tab === item ? 'bg-white text-[#1677FF]' : 'text-[#68707C]'
             )}
           >

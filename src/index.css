@@ -15,13 +15,17 @@
 html,
 body,
 #root {
+  height: 100%;
   min-height: 100%;
 }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: #f2f2f7;
+  background:
+    radial-gradient(1200px 600px at 0% -10%, rgba(22, 119, 255, 0.08), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(0, 210, 255, 0.06), transparent 50%),
+    #f2f2f7;
   color: #171a1f;
   -webkit-font-smoothing: antialiased;
 }
@@ -31,4 +35,35 @@ input,
 textarea,
 select {
   font-family: inherit;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #dde1e7;
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 0 rgba(23, 26, 31, 0.02);
+}
+
+.panel-hover {
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.panel-hover:hover {
+  border-color: #c9d2dc;
+  box-shadow: 0 8px 24px rgba(23, 26, 31, 0.04);
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fade-up 280ms ease both;
 }
