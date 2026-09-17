@@ -37,7 +37,7 @@ export function TrendChart({ data, year }: TrendChartProps) {
         </div>
       </div>
 
-      <div className="h-[320px] w-full">
+      <div className="h-[280px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>

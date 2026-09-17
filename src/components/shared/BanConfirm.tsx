@@ -1,14 +1,14 @@
 import { Ban } from 'lucide-react'
 import { Button } from '../ui/Button'
 
-interface SuspendConfirmProps {
+interface BanConfirmProps {
   companyName: string
   people: number
   onCancel: () => void
   onConfirm: () => void
 }
 
-export function SuspendConfirm({ companyName, people, onCancel, onConfirm }: SuspendConfirmProps) {
+export function BanConfirm({ companyName, people, onCancel, onConfirm }: BanConfirmProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">

@@ -4,7 +4,6 @@ import { PrivateRoute } from './PrivateRoute'
 import { LoginPage } from '../pages/auth/LoginPage'
 import { RegisterPage } from '../pages/auth/RegisterPage'
 import { DashboardPage } from '../pages/dashboard/DashboardPage'
-import { AnalyticsPage } from '../pages/dashboard/AnalyticsPage'
 import { CompaniesPage } from '../pages/companies/CompaniesPage'
 import { CompanyDetailPage } from '../pages/companies/CompanyDetailPage'
 import { UsersPage } from '../pages/users/UsersPage'
@@ -24,7 +23,6 @@ export const router = createBrowserRouter([
     element: <PrivateRoute />,
     children: [
       { path: ROUTES.overview, element: <DashboardPage /> },
-      { path: ROUTES.analytics, element: <AnalyticsPage /> },
       { path: ROUTES.companies, element: <CompaniesPage /> },
       { path: '/companies/:companyId', element: <CompanyDetailPage /> },
       { path: ROUTES.users, element: <UsersPage /> },

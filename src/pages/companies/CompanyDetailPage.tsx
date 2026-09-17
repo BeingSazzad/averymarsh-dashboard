@@ -5,7 +5,7 @@ import { Avatar } from '../../components/shared/Avatar'
 import { Badge } from '../../components/shared/Badge'
 import { CompanyMark } from '../../components/shared/CompanyMark'
 import { SeatMeter } from '../../components/shared/SeatMeter'
-import { SuspendConfirm } from '../../components/shared/SuspendConfirm'
+import { BanConfirm } from '../../components/shared/BanConfirm'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Table, Td, Th } from '../../components/ui/Table'
@@ -342,7 +342,7 @@ export function CompanyDetailPage() {
         onClose={() => setStatusAction(null)}
       >
         {statusAction === 'suspend' ? (
-          <SuspendConfirm
+          <BanConfirm
             companyName={company.name}
             people={company.people}
             onCancel={() => setStatusAction(null)}

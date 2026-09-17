@@ -14,7 +14,6 @@ import { useAppSelector } from '../../store/hooks'
 export function UsersPage() {
   const users = useAppSelector((state) => state.platform.users)
   const companies = useAppSelector((state) => state.platform.companies)
-  const people = companies.reduce((sum, company) => sum + company.people, 0)
   const [query, setQuery] = useState('')
   const q = useDebounce(query)
 
@@ -37,7 +36,7 @@ export function UsersPage() {
     <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Users"
-        subtitle={`${people} people · ${users.length} users`}
+        subtitle={`${users.length} users`}
         action={
           <div className="w-72">
             <Input placeholder="Search name, email, company" value={query} onChange={(e) => setQuery(e.target.value)} />

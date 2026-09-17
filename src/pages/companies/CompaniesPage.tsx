@@ -5,7 +5,7 @@ import { PageHeader } from '../../components/layout/PageHeader'
 import { Badge } from '../../components/shared/Badge'
 import { CompanyMark } from '../../components/shared/CompanyMark'
 import { SeatMeter } from '../../components/shared/SeatMeter'
-import { SuspendConfirm } from '../../components/shared/SuspendConfirm'
+import { BanConfirm } from '../../components/shared/BanConfirm'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
 import { Input } from '../../components/ui/Input'
@@ -60,13 +60,11 @@ export function CompaniesPage() {
 
   const { page, setPage, pageCount, pageItems, total, from, to } = usePagination(rows, 10, query)
 
-  const totalPeople = companies.reduce((sum, company) => sum + company.people, 0)
-
   return (
     <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Companies"
-        subtitle={`${companies.length} companies · ${totalPeople} people`}
+        subtitle={`${companies.length} companies`}
         action={
           <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
             <div className="w-full sm:w-56">
@@ -353,7 +351,7 @@ export function CompaniesPage() {
         ) : null}
 
         {modal?.type === 'suspend' ? (
-          <SuspendConfirm
+          <BanConfirm
             companyName={modal.company.name}
             people={modal.company.people}
             onCancel={() => setModal(null)}
