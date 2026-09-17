@@ -132,7 +132,7 @@ const platformSlice = createSlice({
       state.notifications.unshift({
         id: uid('n'),
         kind: 'access',
-        title: `${next === 'suspended' ? 'Suspended' : next === 'active' ? 'Restored' : 'Updated'} · ${company.name}`,
+        title: `${next === 'suspended' ? 'Banned' : next === 'active' ? 'Restored' : 'Updated'} · ${company.name}`,
         body: company.name,
         createdAt: new Date().toISOString(),
         read: false,

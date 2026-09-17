@@ -1,4 +1,4 @@
-import { PauseCircle } from 'lucide-react'
+import { Ban } from 'lucide-react'
 import { Button } from '../ui/Button'
 
 interface SuspendConfirmProps {
@@ -13,10 +13,10 @@ export function SuspendConfirm({ companyName, people, onCancel, onConfirm }: Sus
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
         <span className="w-10 h-10 rounded-2xl bg-[#FFF0F0] text-[#E5484D] flex items-center justify-center shrink-0">
-          <PauseCircle className="w-5 h-5" />
+          <Ban className="w-5 h-5" />
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-[#171A1F]">Suspend this company?</p>
+          <p className="text-sm font-bold text-[#171A1F]">Ban this company?</p>
           <p className="text-sm text-[#68707C] mt-1 leading-relaxed">
             <span className="font-semibold text-[#171A1F]">{companyName}</span>
             {people > 0 ? ` · ${people} people` : ''}
@@ -47,7 +47,7 @@ export function SuspendConfirm({ companyName, people, onCancel, onConfirm }: Sus
           Cancel
         </Button>
         <Button variant="danger" onClick={onConfirm}>
-          Suspend company
+          Ban company
         </Button>
       </div>
     </div>

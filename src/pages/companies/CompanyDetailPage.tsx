@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, KeyRound, PauseCircle, PlayCircle } from 'lucide-react'
+import { ArrowLeft, Ban, KeyRound, PlayCircle } from 'lucide-react'
 import { Avatar } from '../../components/shared/Avatar'
 import { Badge } from '../../components/shared/Badge'
 import { CompanyMark } from '../../components/shared/CompanyMark'
@@ -122,8 +122,8 @@ export function CompanyDetailPage() {
                   </Button>
                 ) : (
                   <Button size="sm" variant="danger" onClick={() => setStatusAction('suspend')}>
-                    <PauseCircle className="w-3.5 h-3.5" />
-                    Suspend
+                    <Ban className="w-3.5 h-3.5" />
+                    Ban
                   </Button>
                 )}
                 <Button
@@ -336,7 +336,7 @@ export function CompanyDetailPage() {
       ) : null}
 
       <Modal
-        title={statusAction === 'restore' ? 'Restore access' : 'Suspend company'}
+        title={statusAction === 'restore' ? 'Restore access' : 'Ban company'}
         open={Boolean(statusAction)}
         onClose={() => setStatusAction(null)}
       >

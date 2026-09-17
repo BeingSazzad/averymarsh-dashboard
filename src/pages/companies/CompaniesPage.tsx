@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, PauseCircle, Pencil, PlayCircle, Plus, Trash2 } from 'lucide-react'
+import { Ban, Eye, Pencil, PlayCircle, Plus, Trash2 } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Badge } from '../../components/shared/Badge'
 import { CompanyMark } from '../../components/shared/CompanyMark'
@@ -170,11 +170,11 @@ export function CompaniesPage() {
                       </IconButton>
                     ) : (
                       <IconButton
-                        label="Suspend"
+                        label="Ban"
                         tone="danger"
                         onClick={() => setModal({ type: 'suspend', company })}
                       >
-                        <PauseCircle className="w-3.5 h-3.5" />
+                        <Ban className="w-3.5 h-3.5" />
                       </IconButton>
                     )}
                     <IconButton
@@ -208,7 +208,7 @@ export function CompaniesPage() {
               : modal?.type === 'delete'
                 ? 'Delete company'
                 : modal?.type === 'suspend'
-                  ? 'Suspend company'
+                  ? 'Ban company'
                   : ''
         }
         open={Boolean(modal)}

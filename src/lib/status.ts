@@ -10,7 +10,7 @@ export function companyTone(status: CompanyStatus) {
 export function companyLabel(status: CompanyStatus) {
   if (status === 'past_due') return 'Past due'
   if (status === 'trial') return 'Trial'
-  if (status === 'suspended') return 'Suspended'
+  if (status === 'suspended') return 'Banned'
   if (status === 'canceled') return 'Canceled'
   return 'Active'
 }
