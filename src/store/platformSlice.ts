@@ -239,6 +239,8 @@ export function newPlan(): Plan {
     yearlyPrice: 0,
     seats: 5,
     active: true,
+    description: '',
+    features: [],
   }
 }
 

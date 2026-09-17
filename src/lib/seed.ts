@@ -23,9 +23,62 @@ export function yearSeries(year: number): MonthlyPoint[] {
 }
 
 export const seedPlans: Plan[] = [
-  { id: 'plan-field', name: 'Field', monthlyPrice: 49, yearlyPrice: 490, seats: 8, active: true },
-  { id: 'plan-crew', name: 'Crew', monthlyPrice: 129, yearlyPrice: 1290, seats: 25, active: true },
-  { id: 'plan-company', name: 'Company', monthlyPrice: 249, yearlyPrice: 2490, seats: 80, active: true },
+  {
+    id: 'plan-field',
+    name: 'Field',
+    monthlyPrice: 49,
+    yearlyPrice: 490,
+    seats: 8,
+    active: true,
+    description: 'Small crews running jobs from the site.',
+    features: [
+      'Daily field logs & punch list',
+      'Tasks and schedule on assigned jobs',
+      'Site photos & document upload',
+      'Milestone tracker',
+      'Latti field insights (limited)',
+      'Owner + PM + Field roles',
+      'Offline / field sync cache',
+    ],
+  },
+  {
+    id: 'plan-crew',
+    name: 'Crew',
+    monthlyPrice: 129,
+    yearlyPrice: 1290,
+    seats: 25,
+    active: true,
+    description: 'Growing GCs managing multiple active jobs.',
+    features: [
+      'Everything in Field',
+      'Multiple projects & team invites',
+      'Project updates & team directory',
+      'Change orders (request + review)',
+      'Budget view & log expense',
+      'Plans / BuildScope documents',
+      'Weather impact on jobs',
+      'Messages hub',
+    ],
+  },
+  {
+    id: 'plan-company',
+    name: 'Company',
+    monthlyPrice: 249,
+    yearlyPrice: 2490,
+    seats: 80,
+    active: true,
+    description: 'Full Lattice workspace for owners and finance.',
+    features: [
+      'Everything in Crew',
+      'Full budget ledger + presets',
+      'Pay apps, draws & lien waivers',
+      'Financial reports & P&L',
+      'Finance role seats',
+      'Company profile & subscription control',
+      'Lender / financing connections',
+      'Priority support tickets',
+    ],
+  },
 ]
 
 export const seedCompanies: Company[] = [

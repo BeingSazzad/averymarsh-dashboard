@@ -44,6 +44,8 @@ export interface Plan {
   yearlyPrice: number
   seats: number
   active: boolean
+  description: string
+  features: string[]
 }
 
 export interface Invoice {
