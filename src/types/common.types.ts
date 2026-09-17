@@ -2,7 +2,9 @@ export type CompanyStatus = 'trial' | 'active' | 'past_due' | 'canceled'
 export type InvoiceStatus = 'paid' | 'failed' | 'open'
 export type AdminStatus = 'active' | 'invited'
 export type AccessMethod = 'invite' | 'credentials'
-export type NotificationKind = 'payment' | 'trial' | 'access' | 'system'
+export type NotificationKind = 'payment' | 'trial' | 'access' | 'system' | 'support'
+export type TicketStatus = 'open' | 'pending' | 'resolved'
+export type TicketPriority = 'low' | 'normal' | 'high'
 
 export interface MonthlyPoint {
   month: string
@@ -99,4 +101,16 @@ export interface GrantAccessPayload {
   ownerEmail: string
   accessMethod: AccessMethod
   tempPassword?: string
+}
+
+export interface SupportTicket {
+  id: string
+  companyId: string
+  subject: string
+  requester: string
+  status: TicketStatus
+  priority: TicketPriority
+  createdAt: string
+  updatedAt: string
+  body: string
 }

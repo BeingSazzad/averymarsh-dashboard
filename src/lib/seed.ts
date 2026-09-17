@@ -9,6 +9,7 @@ import type {
   MonthlyPoint,
   Plan,
   SeatUser,
+  SupportTicket,
 } from '../types/common.types'
 
 export function yearSeries(year: number): MonthlyPoint[] {
@@ -216,5 +217,61 @@ export const seedNotifications: AppNotification[] = [
     createdAt: '2026-08-28T16:40:00',
     read: true,
     href: '/cms',
+  },
+  {
+    id: 'n-6',
+    kind: 'support',
+    title: 'New ticket · Avery & Marsh',
+    body: 'Owner cannot reset password after phone change.',
+    createdAt: '2026-09-17T10:05:00',
+    read: false,
+    href: '/support',
+  },
+]
+
+export const seedTickets: SupportTicket[] = [
+  {
+    id: 'tkt-201',
+    companyId: 'co-1',
+    subject: 'Owner locked out — need password reset',
+    requester: 'avery@averymarsh.com',
+    status: 'open',
+    priority: 'high',
+    createdAt: '2026-09-17',
+    updatedAt: '2026-09-17',
+    body: 'Avery changed phones and cannot get the reset SMS. Please reset the owner login.',
+  },
+  {
+    id: 'tkt-202',
+    companyId: 'co-4',
+    subject: 'Payment failed but card is valid',
+    requester: 'dana@ridgeline.com',
+    status: 'pending',
+    priority: 'high',
+    createdAt: '2026-09-16',
+    updatedAt: '2026-09-17',
+    body: 'Card was updated yesterday. Still seeing past due on Field plan.',
+  },
+  {
+    id: 'tkt-203',
+    companyId: 'co-2',
+    subject: 'Add 5 more seats mid-cycle',
+    requester: 'omar@harborview.com',
+    status: 'open',
+    priority: 'normal',
+    createdAt: '2026-09-15',
+    updatedAt: '2026-09-15',
+    body: 'Hiring next week. Need Crew seats increased without waiting for renew.',
+  },
+  {
+    id: 'tkt-204',
+    companyId: 'co-3',
+    subject: 'Trial extension request',
+    requester: 'elena@snellisle.com',
+    status: 'resolved',
+    priority: 'low',
+    createdAt: '2026-09-10',
+    updatedAt: '2026-09-12',
+    body: 'Demo with GC board delayed. Asking for 7 more trial days.',
   },
 ]

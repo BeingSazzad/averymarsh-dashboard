@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Bell, CheckCheck, CreditCard, KeyRound, ShieldAlert, Timer } from 'lucide-react'
+import { Bell, CheckCheck, CreditCard, KeyRound, LifeBuoy, ShieldAlert, Timer } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Badge } from '../../components/shared/Badge'
 import { Button } from '../../components/ui/Button'
@@ -13,6 +13,7 @@ function kindMeta(kind: NotificationKind) {
   if (kind === 'payment') return { icon: CreditCard, tone: 'blue' as const, label: 'Payment' }
   if (kind === 'trial') return { icon: Timer, tone: 'amber' as const, label: 'Trial' }
   if (kind === 'access') return { icon: KeyRound, tone: 'green' as const, label: 'Access' }
+  if (kind === 'support') return { icon: LifeBuoy, tone: 'blue' as const, label: 'Support' }
   return { icon: ShieldAlert, tone: 'slate' as const, label: 'System' }
 }
 

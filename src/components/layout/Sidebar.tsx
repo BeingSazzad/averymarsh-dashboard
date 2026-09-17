@@ -5,6 +5,7 @@ import {
   CreditCard,
   FileText,
   LayoutDashboard,
+  LifeBuoy,
   LogOut,
   Shield,
   Users,
@@ -21,6 +22,7 @@ export const NAV_ITEMS = [
   { to: ROUTES.users, label: 'Users', icon: Users },
   { to: ROUTES.plans, label: 'Plans', icon: Wallet },
   { to: ROUTES.billing, label: 'Billing', icon: CreditCard },
+  { to: ROUTES.support, label: 'Support', icon: LifeBuoy },
   { to: ROUTES.cms, label: 'CMS', icon: FileText },
   { to: ROUTES.admins, label: 'Admins', icon: Shield },
 ]

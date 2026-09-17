@@ -8,6 +8,7 @@ import {
   seedLegal,
   seedNotifications,
   seedPlans,
+  seedTickets,
   seedUsers,
 } from '../lib/seed'
 import type {
@@ -21,6 +22,8 @@ import type {
   Plan,
   SeatUser,
   SessionAdmin,
+  SupportTicket,
+  TicketStatus,
 } from '../types/common.types'
 
 export interface PlatformState {
@@ -34,6 +37,7 @@ export interface PlatformState {
   legal: LegalDoc[]
   admins: Admin[]
   notifications: AppNotification[]
+  tickets: SupportTicket[]
 }
 
 const initialState: PlatformState = {
@@ -47,6 +51,7 @@ const initialState: PlatformState = {
   legal: seedLegal,
   admins: seedAdmins,
   notifications: seedNotifications,
+  tickets: seedTickets,
 }
 
 const platformSlice = createSlice({
@@ -174,6 +179,31 @@ const platformSlice = createSlice({
         note.read = true
       })
     },
+    resetUserPassword(state, action: PayloadAction<{ userId: string; tempPassword: string }>) {
+      const user = state.users.find((item) => item.id === action.payload.userId)
+      if (!user) return
+      const company = state.companies.find((item) => item.id === user.companyId)
+      state.notifications.unshift({
+        id: uid('n'),
+        kind: 'access',
+        title: `Password reset · ${user.name}`,
+        body: `Temp password for ${user.email}: ${action.payload.tempPassword}. Share once, then ask them to change it.`,
+        createdAt: new Date().toISOString(),
+        read: false,
+        href: company ? `/companies/${company.id}` : '/users',
+      })
+    },
+    upsertTicket(state, action: PayloadAction<SupportTicket>) {
+      const index = state.tickets.findIndex((ticket) => ticket.id === action.payload.id)
+      if (index >= 0) state.tickets[index] = action.payload
+      else state.tickets.unshift(action.payload)
+    },
+    setTicketStatus(state, action: PayloadAction<{ id: string; status: TicketStatus }>) {
+      const ticket = state.tickets.find((item) => item.id === action.payload.id)
+      if (!ticket) return
+      ticket.status = action.payload.status
+      ticket.updatedAt = new Date().toISOString().slice(0, 10)
+    },
   },
 })
 
@@ -194,6 +224,9 @@ export const {
   grantAccess,
   markNotificationRead,
   markAllNotificationsRead,
+  resetUserPassword,
+  upsertTicket,
+  setTicketStatus,
 } = platformSlice.actions
 
 export const platformReducer = platformSlice.reducer
@@ -222,4 +255,23 @@ export function newAdmin(): Admin {
     status: 'invited',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&auto=format&fit=crop&q=80',
   }
+}
+
+export function newTicket(companyId: string): SupportTicket {
+  const today = new Date().toISOString().slice(0, 10)
+  return {
+    id: uid('tkt'),
+    companyId,
+    subject: '',
+    requester: '',
+    status: 'open',
+    priority: 'normal',
+    createdAt: today,
+    updatedAt: today,
+    body: '',
+  }
+}
+
+export function makeTempPassword(): string {
+  return `Lat${Math.random().toString(36).slice(2, 6)}!${Math.floor(Math.random() * 90 + 10)}`
 }

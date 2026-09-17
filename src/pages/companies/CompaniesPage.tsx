@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Eye, KeyRound, Pencil, Plus, RefreshCw, Trash2, Users } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Badge } from '../../components/shared/Badge'
@@ -10,6 +11,7 @@ import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
 import { Select } from '../../components/ui/Select'
 import { Table, Td, Th } from '../../components/ui/Table'
+import { companyPath } from '../../constants/routes'
 import { companyLabel, companyTone } from '../../lib/status'
 import { classNames, formatDate, money } from '../../lib/utils'
 import {
@@ -22,10 +24,11 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import type { AccessMethod, Company } from '../../types/common.types'
 
 type ModalMode =
-  | { type: 'track' | 'rename' | 'delete'; company: Company }
+  | { type: 'rename' | 'delete'; company: Company }
   | { type: 'grant' }
 
 export function CompaniesPage() {
+  const navigate = useNavigate()
   const companies = useAppSelector((state) => state.platform.companies)
   const plans = useAppSelector((state) => state.platform.plans)
   const users = useAppSelector((state) => state.platform.users)
@@ -52,11 +55,6 @@ export function CompaniesPage() {
         (plans.find((plan) => plan.id === company.planId)?.name ?? '').toLowerCase().includes(needle)
     )
   }, [companies, plans, query])
-
-  const trackedUsers = useMemo(() => {
-    if (!modal || modal.type !== 'track') return []
-    return users.filter((user) => user.companyId === modal.company.id)
-  }, [modal, users])
 
   const totalPeople = companies.reduce((sum, company) => sum + company.people, 0)
 
@@ -123,13 +121,15 @@ export function CompaniesPage() {
             return (
               <tr key={company.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
                 <Td>
-                  <div className="flex items-center gap-3 min-w-[240px]">
+                  <Link to={companyPath(company.id)} className="flex items-center gap-3 min-w-[240px] group">
                     <CompanyMark name={company.name} logo={company.logo} />
                     <div className="min-w-0">
-                      <p className="font-semibold text-[#171A1F] truncate">{company.name}</p>
+                      <p className="font-semibold text-[#171A1F] truncate group-hover:text-[#1677FF]">
+                        {company.name}
+                      </p>
                       <p className="text-xs text-[#68707C] mt-0.5 truncate">{company.ownerEmail}</p>
                     </div>
-                  </div>
+                  </Link>
                 </Td>
                 <Td className="text-[#68707C] font-medium">
                   {plans.find((plan) => plan.id === company.planId)?.name ?? '—'}
@@ -156,9 +156,9 @@ export function CompaniesPage() {
                 <Td>
                   <div className="flex justify-end gap-1.5">
                     <IconButton
-                      label="Track people"
+                      label="Open company"
                       tone="blue"
-                      onClick={() => setModal({ type: 'track', company })}
+                      onClick={() => navigate(companyPath(company.id))}
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </IconButton>
@@ -193,17 +193,15 @@ export function CompaniesPage() {
         title={
           modal?.type === 'grant'
             ? 'Grant Lattice access'
-            : modal?.type === 'track'
-              ? `People · ${modal.company.name}`
-              : modal?.type === 'rename'
-                ? 'Rename company'
-                : modal?.type === 'delete'
-                  ? 'Delete company'
-                  : ''
+            : modal?.type === 'rename'
+              ? 'Rename company'
+              : modal?.type === 'delete'
+                ? 'Delete company'
+                : ''
         }
         open={Boolean(modal)}
         onClose={() => setModal(null)}
-        wide={modal?.type === 'track' || modal?.type === 'grant'}
+        wide={modal?.type === 'grant'}
       >
         {modal?.type === 'grant' ? (
           grantDone ? (
@@ -311,32 +309,6 @@ export function CompaniesPage() {
               </div>
             </form>
           )
-        ) : null}
-
-        {modal?.type === 'track' ? (
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-[#68707C]">
-              {modal.company.people} people on this account · {trackedUsers.length} shown in directory
-            </p>
-            {trackedUsers.length === 0 ? (
-              <p className="text-sm text-[#68707C] py-4 text-center">No directory users yet.</p>
-            ) : (
-              <ul className="max-h-72 overflow-y-auto divide-y divide-[#EAEDF1] rounded-xl border border-[#EAEDF1]">
-                {trackedUsers.map((user) => (
-                  <li key={user.id} className="px-3 py-2.5 flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#171A1F] truncate">{user.name}</p>
-                      <p className="text-xs text-[#68707C] truncate">{user.email}</p>
-                    </div>
-                    <Badge tone="slate">{user.role}</Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Button variant="secondary" onClick={() => setModal(null)}>
-              Close
-            </Button>
-          </div>
         ) : null}
 
         {modal?.type === 'rename' ? (
