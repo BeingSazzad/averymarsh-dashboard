@@ -1,28 +1,38 @@
+import { useState } from 'react'
 import { initials } from '../../lib/utils'
 import { classNames } from '../../lib/utils'
 
 interface CompanyMarkProps {
   name: string
+  logo?: string
   size?: number
   className?: string
 }
 
-const accents = ['#1677FF', '#0F5FD7', '#0EA5E9', '#334155', '#475569']
+export function CompanyMark({ name, logo, size = 40, className }: CompanyMarkProps) {
+  const [failed, setFailed] = useState(false)
 
-export function CompanyMark({ name, size = 40, className }: CompanyMarkProps) {
-  const tone = accents[name.length % accents.length]
+  if (logo && !failed) {
+    return (
+      <img
+        src={logo}
+        alt=""
+        width={size}
+        height={size}
+        className={classNames('rounded-xl object-cover shrink-0 border border-[#EAEDF1]', className)}
+        style={{ width: size, height: size }}
+        onError={() => setFailed(true)}
+      />
+    )
+  }
+
   return (
     <span
       className={classNames(
-        'rounded-xl text-white font-bold flex items-center justify-center shrink-0 tracking-wide',
+        'rounded-xl text-white font-bold flex items-center justify-center shrink-0 tracking-wide bg-[#1677FF]',
         className
       )}
-      style={{
-        width: size,
-        height: size,
-        fontSize: size > 36 ? 13 : 11,
-        background: `linear-gradient(145deg, ${tone}, #0B1220)`,
-      }}
+      style={{ width: size, height: size, fontSize: size > 36 ? 13 : 11 }}
       aria-hidden
     >
       {initials(name)}

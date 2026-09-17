@@ -30,7 +30,7 @@ export function UsersPage() {
   }, [users, q, companies])
 
   return (
-    <div className="flex flex-col gap-5 max-w-[1280px]">
+    <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Users"
         subtitle={`${people} people on tenants · ${users.length} in this directory`}
@@ -70,7 +70,7 @@ export function UsersPage() {
                 <Td>
                   {company ? (
                     <div className="flex items-center gap-2.5">
-                      <CompanyMark name={company.name} size={28} />
+                      <CompanyMark name={company.name} logo={company.logo} size={28} />
                       <span className="text-[#68707C] font-medium">{company.name}</span>
                     </div>
                   ) : (

@@ -10,7 +10,7 @@ export function BillingPage() {
   const companies = useAppSelector((state) => state.platform.companies)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5 w-full">
       <PageHeader title="Billing" subtitle="Invoices from Lattice subscriptions" />
       <Table>
         <thead>

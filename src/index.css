@@ -67,3 +67,24 @@ select {
 .fade-up {
   animation: fade-up 280ms ease both;
 }
+
+.prose-cms h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #171a1f;
+}
+
+.prose-cms p {
+  margin: 0 0 0.75rem;
+}
+
+.prose-cms ul,
+.prose-cms ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+}
+
+.prose-cms li {
+  margin: 0.2rem 0;
+}

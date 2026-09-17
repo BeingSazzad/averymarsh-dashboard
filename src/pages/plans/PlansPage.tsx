@@ -17,7 +17,7 @@ export function PlansPage() {
   const [draft, setDraft] = useState<Plan | null>(null)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Plans"
         subtitle="What companies buy"

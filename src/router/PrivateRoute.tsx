@@ -26,7 +26,7 @@ export function PrivateRoute() {
   return (
     <AppShell>
       <Topbar />
-      <main className="flex-1 min-h-0 overflow-y-auto px-4 py-5 md:px-6 md:py-6">
+      <main className="flex-1 min-h-0 overflow-y-auto px-5 py-5 md:px-8 md:py-6 lg:px-10">
         <Outlet />
       </main>
     </AppShell>

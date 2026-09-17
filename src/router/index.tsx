@@ -12,6 +12,7 @@ import { BillingPage } from '../pages/billing/BillingPage'
 import { CmsPage } from '../pages/cms/CmsPage'
 import { AdminsPage } from '../pages/admins/AdminsPage'
 import { ProfilePage } from '../pages/profile/ProfilePage'
+import { NotificationsPage } from '../pages/notifications/NotificationsPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 
 export const router = createBrowserRouter([
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: ROUTES.cms, element: <CmsPage /> },
       { path: ROUTES.admins, element: <AdminsPage /> },
       { path: ROUTES.profile, element: <ProfilePage /> },
+      { path: ROUTES.notifications, element: <NotificationsPage /> },
     ],
   },
   { path: '*', element: <NotFoundPage /> },

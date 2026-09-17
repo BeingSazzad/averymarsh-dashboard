@@ -6,13 +6,16 @@ import {
   seedFaqs,
   seedInvoices,
   seedLegal,
+  seedNotifications,
   seedPlans,
   seedUsers,
 } from '../lib/seed'
 import type {
   Admin,
+  AppNotification,
   Company,
   FaqItem,
+  GrantAccessPayload,
   Invoice,
   LegalDoc,
   Plan,
@@ -30,6 +33,7 @@ export interface PlatformState {
   faqs: FaqItem[]
   legal: LegalDoc[]
   admins: Admin[]
+  notifications: AppNotification[]
 }
 
 const initialState: PlatformState = {
@@ -42,6 +46,7 @@ const initialState: PlatformState = {
   faqs: seedFaqs,
   legal: seedLegal,
   admins: seedAdmins,
+  notifications: seedNotifications,
 }
 
 const platformSlice = createSlice({
@@ -80,7 +85,9 @@ const platformSlice = createSlice({
       state.faqs = state.faqs.filter((item) => item.id !== action.payload)
     },
     saveLegal(state, action: PayloadAction<LegalDoc>) {
-      state.legal = state.legal.map((doc) => (doc.id === action.payload.id ? action.payload : doc))
+      const index = state.legal.findIndex((doc) => doc.id === action.payload.id)
+      if (index >= 0) state.legal[index] = action.payload
+      else state.legal.push(action.payload)
     },
     upsertAdmin(state, action: PayloadAction<Admin>) {
       const index = state.admins.findIndex((admin) => admin.id === action.payload.id)
@@ -110,6 +117,63 @@ const platformSlice = createSlice({
       state.users = state.users.filter((user) => user.companyId !== action.payload)
       state.invoices = state.invoices.filter((invoice) => invoice.companyId !== action.payload)
     },
+    grantAccess(state, action: PayloadAction<GrantAccessPayload>) {
+      const plan = state.plans.find((item) => item.id === action.payload.planId)
+      if (!plan || !action.payload.companyName.trim() || !action.payload.ownerEmail.trim()) return
+
+      const companyId = uid('co')
+      const today = new Date().toISOString().slice(0, 10)
+      const renewsOn = addOneYear(today)
+
+      state.companies.unshift({
+        id: companyId,
+        name: action.payload.companyName.trim(),
+        planId: plan.id,
+        seats: plan.seats,
+        people: 1,
+        status: 'active',
+        mrr: plan.monthlyPrice,
+        joined: today,
+        renewsOn,
+        logo: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=160&h=160&fit=crop&q=80',
+        ownerEmail: action.payload.ownerEmail.trim().toLowerCase(),
+        accessMethod: action.payload.accessMethod,
+      })
+
+      state.users.unshift({
+        id: uid('u'),
+        name: action.payload.ownerName.trim() || 'Company Owner',
+        email: action.payload.ownerEmail.trim().toLowerCase(),
+        companyId,
+        role: 'Owner',
+        lastActive: today,
+      })
+
+      state.notifications.unshift({
+        id: uid('n'),
+        kind: 'access',
+        title:
+          action.payload.accessMethod === 'invite'
+            ? `Invite sent · ${action.payload.companyName.trim()}`
+            : `Login created · ${action.payload.companyName.trim()}`,
+        body:
+          action.payload.accessMethod === 'invite'
+            ? `Invite emailed to ${action.payload.ownerEmail.trim()}. They can open Lattice and set a password.`
+            : `Temporary password set for ${action.payload.ownerEmail.trim()}. Share it securely, then ask them to change it.`,
+        createdAt: new Date().toISOString(),
+        read: false,
+        href: '/companies',
+      })
+    },
+    markNotificationRead(state, action: PayloadAction<string>) {
+      const item = state.notifications.find((note) => note.id === action.payload)
+      if (item) item.read = true
+    },
+    markAllNotificationsRead(state) {
+      state.notifications.forEach((note) => {
+        note.read = true
+      })
+    },
   },
 })
 
@@ -127,6 +191,9 @@ export const {
   renameCompany,
   renewCompany,
   deleteCompany,
+  grantAccess,
+  markNotificationRead,
+  markAllNotificationsRead,
 } = platformSlice.actions
 
 export const platformReducer = platformSlice.reducer

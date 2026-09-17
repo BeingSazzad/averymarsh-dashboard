@@ -7,14 +7,14 @@ import { MobileNav } from './Sidebar'
 
 export function Topbar() {
   const session = useAppSelector((state) => state.platform.session)
-  const atRisk = useAppSelector((state) =>
-    state.platform.companies.filter((company) => company.status === 'past_due' || company.status === 'trial').length
+  const unread = useAppSelector(
+    (state) => state.platform.notifications.filter((note) => !note.read).length
   )
 
   return (
     <header className="bg-white/90 backdrop-blur border-b border-[#EAEDF1] shrink-0">
-      <div className="h-[68px] px-4 md:px-6 flex items-center gap-4">
-        <div className="flex-1 max-w-lg relative">
+      <div className="h-[68px] px-5 md:px-8 lg:px-10 flex items-center gap-4">
+        <div className="flex-1 max-w-xl relative">
           <Search className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             placeholder="Search companies, people, invoices…"
@@ -24,14 +24,14 @@ export function Topbar() {
 
         <div className="ml-auto flex items-center gap-2.5">
           <Link
-            to={ROUTES.companies}
+            to={ROUTES.notifications}
             className="relative w-11 h-11 rounded-2xl border border-[#DDE1E7] bg-white flex items-center justify-center text-[#171A1F] hover:bg-[#F2F2F7] transition"
-            aria-label="Alerts"
+            aria-label="Notifications"
           >
             <Bell className="w-4 h-4" strokeWidth={1.9} />
-            {atRisk > 0 ? (
+            {unread > 0 ? (
               <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-[#1677FF] text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
-                {atRisk}
+                {unread}
               </span>
             ) : null}
           </Link>
@@ -39,7 +39,7 @@ export function Topbar() {
           {session ? (
             <Link
               to={ROUTES.profile}
-              className="h-11 pl-1.5 pr-3 rounded-2xl border border-[#DDE1E7] bg-white flex items-center gap-2.5 min-w-0 hover:bg-[#F8FAFC] transition"
+              className="h-11 pl-1.5 pr-2.5 rounded-2xl border border-[#DDE1E7] bg-white flex items-center gap-2.5 min-w-0 hover:bg-[#F8FAFC] transition"
             >
               <Avatar src={session.avatar} name={session.name} size={32} />
               <div className="hidden sm:block min-w-0 text-left">
@@ -50,7 +50,7 @@ export function Topbar() {
                   Admin
                 </p>
               </div>
-              <ChevronDown className="hidden sm:block w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
+              <ChevronDown className="hidden sm:block w-4 h-4 text-[#68707C] shrink-0 ml-0.5" />
             </Link>
           ) : null}
         </div>

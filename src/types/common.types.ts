@@ -1,6 +1,8 @@
 export type CompanyStatus = 'trial' | 'active' | 'past_due' | 'canceled'
 export type InvoiceStatus = 'paid' | 'failed' | 'open'
 export type AdminStatus = 'active' | 'invited'
+export type AccessMethod = 'invite' | 'credentials'
+export type NotificationKind = 'payment' | 'trial' | 'access' | 'system'
 
 export interface MonthlyPoint {
   month: string
@@ -19,6 +21,9 @@ export interface Company {
   mrr: number
   joined: string
   renewsOn: string
+  logo: string
+  ownerEmail: string
+  accessMethod: AccessMethod
 }
 
 export interface SeatUser {
@@ -55,7 +60,7 @@ export interface FaqItem {
 }
 
 export interface LegalDoc {
-  id: 'terms' | 'privacy'
+  id: 'terms' | 'privacy' | 'about'
   title: string
   body: string
   updatedAt: string
@@ -75,4 +80,23 @@ export interface SessionAdmin {
   name: string
   email: string
   avatar: string
+}
+
+export interface AppNotification {
+  id: string
+  kind: NotificationKind
+  title: string
+  body: string
+  createdAt: string
+  read: boolean
+  href?: string
+}
+
+export interface GrantAccessPayload {
+  companyName: string
+  planId: string
+  ownerName: string
+  ownerEmail: string
+  accessMethod: AccessMethod
+  tempPassword?: string
 }

@@ -8,4 +8,5 @@ export const ROUTES = {
   cms: '/cms',
   admins: '/admins',
   profile: '/profile',
+  notifications: '/notifications',
 } as const

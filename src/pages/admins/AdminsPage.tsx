@@ -19,7 +19,7 @@ export function AdminsPage() {
   const [draft, setDraft] = useState<Admin | null>(null)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Admins"
         subtitle="People who operate this dashboard"

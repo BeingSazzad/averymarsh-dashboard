@@ -41,7 +41,7 @@ export function AttentionList() {
               key={company.id}
               className="py-3.5 border-t border-[#EAEDF1] first:border-t-0 first:pt-0 last:pb-0 flex items-center gap-3"
             >
-              <CompanyMark name={company.name} size={36} />
+              <CompanyMark name={company.name} logo={company.logo} size={36} />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-[#171A1F] truncate">{company.name}</p>
                 <p className="text-xs text-[#68707C] mt-0.5">
