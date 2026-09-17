@@ -273,7 +273,6 @@ function TicketDetail({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-bold tabular-nums text-[#171A1F]">{ticket.number}</span>
         <Badge tone={ticketTone(ticket.status)}>{ticket.status}</Badge>
         <Badge tone={ticket.priority === 'high' ? 'amber' : 'slate'}>{`${ticket.priority} priority`}</Badge>
         <span className="text-xs text-[#68707C]">Updated {formatDate(ticket.updatedAt)}</span>
