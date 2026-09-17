@@ -9,6 +9,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('sazzad@lattice.build')
   const [password, setPassword] = useState('lattice')
   const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -17,26 +18,26 @@ export function LoginPage() {
         className="relative w-full max-w-[400px] bg-white/95 backdrop-blur border border-[#DDE1E7] rounded-[28px] p-8 flex flex-col gap-5 shadow-[0_24px_60px_rgba(23,26,31,0.08)]"
         onSubmit={(event) => {
           event.preventDefault()
-          try {
-            setError('')
-            login(email, password)
-          } catch (err) {
-            setError(err instanceof Error ? err.message : 'Could not sign in')
-          }
+          void (async () => {
+            try {
+              setBusy(true)
+              setError('')
+              await login(email, password)
+            } catch (err) {
+              setError(err instanceof Error ? err.message : 'Could not sign in')
+            } finally {
+              setBusy(false)
+            }
+          })()
         }}
       >
         <LatticeLogo size="md" />
-        <div>
-          <h1 className="text-xl font-bold text-[#171A1F] tracking-tight">Admin sign in</h1>
-          <p className="text-sm text-[#68707C] mt-1.5 leading-relaxed">
-            Manage companies, seats, plans, and billing for Lattice.
-          </p>
-        </div>
+        <h1 className="text-xl font-bold text-[#171A1F] tracking-tight">Admin sign in</h1>
         <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {error ? <p className="text-xs text-[#E5484D]">{error}</p> : null}
-        <Button type="submit" className="w-full h-11 rounded-2xl">
-          Sign in
+        <Button type="submit" className="w-full h-11 rounded-2xl" disabled={busy}>
+          {busy ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
     </div>

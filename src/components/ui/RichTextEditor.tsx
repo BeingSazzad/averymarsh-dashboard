@@ -72,7 +72,7 @@ export function RichTextEditor({ label, value, onChange, className }: RichTextEd
           ref={ref}
           contentEditable
           suppressContentEditableWarning
-          className="min-h-[220px] px-4 py-3 text-sm text-[#171A1F] outline-none leading-relaxed prose-cms"
+          className="min-h-[160px] px-4 py-3 text-sm text-[#171A1F] outline-none leading-relaxed prose-cms"
           onInput={() => {
             if (ref.current) onChange(ref.current.innerHTML)
           }}

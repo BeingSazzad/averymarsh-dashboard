@@ -47,7 +47,7 @@ export function Topbar() {
                   {session.name}
                 </p>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-[#94A3B8] leading-tight">
-                  Admin
+                  Super Admin
                 </p>
               </div>
               <ChevronDown className="hidden sm:block w-4 h-4 text-[#68707C] shrink-0 ml-0.5" />

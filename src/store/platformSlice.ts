@@ -15,6 +15,7 @@ import type {
   Admin,
   AppNotification,
   Company,
+  CompanyStatus,
   FaqItem,
   GrantAccessPayload,
   Invoice,
@@ -95,11 +96,19 @@ const platformSlice = createSlice({
       else state.legal.push(action.payload)
     },
     upsertAdmin(state, action: PayloadAction<Admin>) {
+      if (action.payload.role === 'Super Admin') return
       const index = state.admins.findIndex((admin) => admin.id === action.payload.id)
-      if (index >= 0) state.admins[index] = action.payload
-      else state.admins.push(action.payload)
+      if (index >= 0) {
+        if (state.admins[index].role === 'Super Admin') return
+        state.admins[index] = { ...action.payload, role: 'Admin' }
+      } else {
+        state.admins.push({ ...action.payload, role: 'Admin' })
+      }
     },
     deleteAdmin(state, action: PayloadAction<string>) {
+      const target = state.admins.find((admin) => admin.id === action.payload)
+      if (!target || target.role === 'Super Admin') return
+      if (state.session?.id === action.payload) return
       state.admins = state.admins.filter((admin) => admin.id !== action.payload)
     },
     renameCompany(state, action: PayloadAction<{ id: string; name: string }>) {
@@ -109,13 +118,26 @@ const platformSlice = createSlice({
       if (!next) return
       company.name = next
     },
-    renewCompany(state, action: PayloadAction<string>) {
-      const company = state.companies.find((item) => item.id === action.payload)
+    setCompanyStatus(state, action: PayloadAction<{ id: string; status: CompanyStatus }>) {
+      const company = state.companies.find((item) => item.id === action.payload.id)
       if (!company) return
-      const plan = state.plans.find((item) => item.id === company.planId)
-      company.status = 'active'
-      company.mrr = plan?.monthlyPrice ?? company.mrr
-      company.renewsOn = addOneYear(company.renewsOn)
+      const next = action.payload.status
+      company.status = next
+      if (next === 'canceled' || next === 'suspended') {
+        company.mrr = 0
+      } else if (next === 'active' || next === 'trial') {
+        const plan = state.plans.find((item) => item.id === company.planId)
+        company.mrr = plan?.monthlyPrice ?? company.mrr
+      }
+      state.notifications.unshift({
+        id: uid('n'),
+        kind: 'access',
+        title: `${next === 'suspended' ? 'Suspended' : next === 'active' ? 'Restored' : 'Updated'} · ${company.name}`,
+        body: company.name,
+        createdAt: new Date().toISOString(),
+        read: false,
+        href: `/companies/${company.id}`,
+      })
     },
     deleteCompany(state, action: PayloadAction<string>) {
       state.companies = state.companies.filter((company) => company.id !== action.payload)
@@ -151,7 +173,7 @@ const platformSlice = createSlice({
         email: action.payload.ownerEmail.trim().toLowerCase(),
         companyId,
         role: 'Owner',
-        lastActive: today,
+        joined: today,
       })
 
       state.notifications.unshift({
@@ -161,10 +183,7 @@ const platformSlice = createSlice({
           action.payload.accessMethod === 'invite'
             ? `Invite sent · ${action.payload.companyName.trim()}`
             : `Login created · ${action.payload.companyName.trim()}`,
-        body:
-          action.payload.accessMethod === 'invite'
-            ? `Invite emailed to ${action.payload.ownerEmail.trim()}. They can open Lattice and set a password.`
-            : `Temporary password set for ${action.payload.ownerEmail.trim()}. Share it securely, then ask them to change it.`,
+        body: action.payload.ownerEmail.trim().toLowerCase(),
         createdAt: new Date().toISOString(),
         read: false,
         href: '/companies',
@@ -187,7 +206,7 @@ const platformSlice = createSlice({
         id: uid('n'),
         kind: 'access',
         title: `Password reset · ${user.name}`,
-        body: `Temp password for ${user.email}: ${action.payload.tempPassword}. Share once, then ask them to change it.`,
+        body: `${user.email} · ${action.payload.tempPassword}`,
         createdAt: new Date().toISOString(),
         read: false,
         href: company ? `/companies/${company.id}` : '/users',
@@ -219,7 +238,7 @@ export const {
   upsertAdmin,
   deleteAdmin,
   renameCompany,
-  renewCompany,
+  setCompanyStatus,
   deleteCompany,
   grantAccess,
   markNotificationRead,
@@ -230,50 +249,3 @@ export const {
 } = platformSlice.actions
 
 export const platformReducer = platformSlice.reducer
-
-export function newPlan(): Plan {
-  return {
-    id: uid('plan'),
-    name: '',
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    seats: 5,
-    active: true,
-    description: '',
-    features: [],
-  }
-}
-
-export function newFaq(): FaqItem {
-  return { id: uid('faq'), question: '', answer: '', published: false }
-}
-
-export function newAdmin(): Admin {
-  return {
-    id: uid('adm'),
-    name: '',
-    email: '',
-    role: 'Admin',
-    status: 'invited',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=160&auto=format&fit=crop&q=80',
-  }
-}
-
-export function newTicket(companyId: string): SupportTicket {
-  const today = new Date().toISOString().slice(0, 10)
-  return {
-    id: uid('tkt'),
-    companyId,
-    subject: '',
-    requester: '',
-    status: 'open',
-    priority: 'normal',
-    createdAt: today,
-    updatedAt: today,
-    body: '',
-  }
-}
-
-export function makeTempPassword(): string {
-  return `Lat${Math.random().toString(36).slice(2, 6)}!${Math.floor(Math.random() * 90 + 10)}`
-}

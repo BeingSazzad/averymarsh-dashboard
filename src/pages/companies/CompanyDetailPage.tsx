@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, KeyRound, RefreshCw } from 'lucide-react'
-import { PageHeader } from '../../components/layout/PageHeader'
+import { ArrowLeft, KeyRound, PauseCircle, PlayCircle } from 'lucide-react'
 import { Avatar } from '../../components/shared/Avatar'
 import { Badge } from '../../components/shared/Badge'
 import { CompanyMark } from '../../components/shared/CompanyMark'
 import { SeatMeter } from '../../components/shared/SeatMeter'
+import { SuspendConfirm } from '../../components/shared/SuspendConfirm'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { Table, Td, Th } from '../../components/ui/Table'
@@ -13,15 +13,16 @@ import { ROUTES } from '../../constants/routes'
 import { companyLabel, companyTone, invoiceTone, ticketTone } from '../../lib/status'
 import { classNames, formatDate, money } from '../../lib/utils'
 import {
-  makeTempPassword,
-  renewCompany,
   resetUserPassword,
+  setCompanyStatus,
   setTicketStatus,
 } from '../../store/platformSlice'
+import { makeTempPassword } from '../../lib/factories'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
-import type { SeatUser } from '../../types/common.types'
+import type { CompanyStatus, SeatUser } from '../../types/common.types'
 
 type Tab = 'overview' | 'members' | 'payments' | 'tickets'
+type StatusAction = 'suspend' | 'restore' | null
 
 export function CompanyDetailPage() {
   const { companyId = '' } = useParams()
@@ -39,6 +40,7 @@ export function CompanyDetailPage() {
   const [tab, setTab] = useState<Tab>('overview')
   const [resetUser, setResetUser] = useState<SeatUser | null>(null)
   const [tempPassword, setTempPassword] = useState('')
+  const [statusAction, setStatusAction] = useState<StatusAction>(null)
 
   const plan = useMemo(
     () => plans.find((item) => item.id === company?.planId),
@@ -63,24 +65,70 @@ export function CompanyDetailPage() {
     { id: 'tickets', label: 'Tickets', count: tickets.length },
   ]
 
+  const isBlocked = company.status === 'suspended'
+
+  const applyStatus = (status: CompanyStatus) => {
+    dispatch(setCompanyStatus({ id: company.id, status }))
+    setStatusAction(null)
+  }
+
   return (
     <div className="flex flex-col gap-5 w-full">
-      <div className="flex items-start gap-3">
-        <Button variant="ghost" className="!px-2" onClick={() => navigate(ROUTES.companies)}>
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <div className="flex-1 min-w-0">
-          <PageHeader
-            title={company.name}
-            subtitle={`${company.ownerEmail} · joined ${formatDate(company.joined)}`}
-            action={
-              <div className="flex flex-wrap gap-2">
-                <Button size="sm" variant="secondary" onClick={() => dispatch(renewCompany(company.id))}>
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Renew
-                </Button>
+      <section className="panel overflow-hidden fade-up">
+        <div className="relative px-5 pt-5 pb-5 md:px-6 md:pt-6 md:pb-6">
+          <div
+            className={classNames(
+              'pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-br to-transparent',
+              company.status === 'suspended' ? 'from-[#FFF7E6] via-[#F8FAFC]' : 'from-[#EAF3FF] via-[#F8FAFC]'
+            )}
+            aria-hidden
+          />
+
+          <div className="relative flex flex-col gap-5">
+            <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+              <div className="flex items-start gap-3 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => navigate(ROUTES.companies)}
+                  className="mt-1 w-9 h-9 rounded-xl border border-[#DDE1E7] bg-white text-[#68707C] hover:text-[#171A1F] hover:bg-[#F8FAFC] inline-flex items-center justify-center cursor-pointer shrink-0"
+                  aria-label="Back to companies"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+
+                <CompanyMark name={company.name} logo={company.logo} size={64} className="!rounded-2xl shadow-sm" />
+
+                <div className="min-w-0 pt-0.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-[22px] font-bold text-[#171A1F] tracking-tight leading-tight truncate">
+                      {company.name}
+                    </h1>
+                    <Badge tone={companyTone(company.status)}>{companyLabel(company.status)}</Badge>
+                  </div>
+                  <p className="text-sm text-[#68707C] mt-1.5 truncate">{company.ownerEmail}</p>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-[#94A3B8]">
+                    <span>Joined {formatDate(company.joined)}</span>
+                    <span className="w-1 h-1 rounded-full bg-[#DDE1E7]" />
+                    <span>Renews {formatDate(company.renewsOn)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 lg:justify-end shrink-0 pl-12 lg:pl-0">
+                {isBlocked ? (
+                  <Button size="sm" onClick={() => setStatusAction('restore')}>
+                    <PlayCircle className="w-3.5 h-3.5" />
+                    Restore access
+                  </Button>
+                ) : (
+                  <Button size="sm" variant="danger" onClick={() => setStatusAction('suspend')}>
+                    <PauseCircle className="w-3.5 h-3.5" />
+                    Suspend
+                  </Button>
+                )}
                 <Button
                   size="sm"
+                  variant="secondary"
                   onClick={() => {
                     const owner = users.find((user) => user.role === 'Owner') ?? users[0]
                     if (!owner) return
@@ -90,39 +138,35 @@ export function CompanyDetailPage() {
                   }}
                 >
                   <KeyRound className="w-3.5 h-3.5" />
-                  Reset owner password
+                  Reset password
                 </Button>
               </div>
-            }
-          />
-        </div>
-      </div>
+            </div>
 
-      <div className="panel p-5 flex flex-col md:flex-row md:items-center gap-4">
-        <CompanyMark name={company.name} logo={company.logo} size={56} />
-        <div className="min-w-0 flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Plan</p>
-            <p className="text-sm font-bold text-[#171A1F] mt-1">{plan?.name ?? '—'}</p>
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Status</p>
-            <div className="mt-1">
-              <Badge tone={companyTone(company.status)}>{companyLabel(company.status)}</Badge>
-            </div>
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">MRR</p>
-            <p className="text-sm font-bold text-[#171A1F] mt-1 tabular-nums">{money(company.mrr)}</p>
-          </div>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">People</p>
-            <div className="mt-1">
-              <SeatMeter people={company.people} seats={company.seats} />
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+              <MetricCard label="Plan" value={plan?.name ?? '—'} hint={plan ? `${money(plan.monthlyPrice)}/mo` : undefined} />
+              <MetricCard
+                label="Status"
+                value={companyLabel(company.status)}
+                valueTone={
+                  company.status === 'active'
+                    ? 'green'
+                    : company.status === 'past_due' || company.status === 'suspended'
+                      ? 'amber'
+                      : company.status === 'canceled'
+                        ? 'red'
+                        : 'slate'
+                }
+              />
+              <MetricCard label="MRR" value={money(company.mrr)} />
+              <div className="rounded-2xl border border-[#EAEDF1] bg-white/90 px-4 py-3.5 flex flex-col gap-2 min-h-[88px]">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#94A3B8]">People</p>
+                <SeatMeter people={company.people} seats={company.seats} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className="flex flex-wrap gap-1 bg-[#EAEDF1] p-1 rounded-2xl w-fit">
         {tabs.map((item) => (
@@ -142,10 +186,9 @@ export function CompanyDetailPage() {
       </div>
 
       {tab === 'overview' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          <div className="panel p-5 flex flex-col gap-3">
-            <h2 className="text-sm font-bold text-[#171A1F]">Account</h2>
-            <Row label="Access" value={company.accessMethod === 'invite' ? 'Invite' : 'Login'} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="panel p-5 flex flex-col gap-1">
+            <h2 className="text-sm font-bold text-[#171A1F] mb-2">Account</h2>
             <Row label="Renews" value={formatDate(company.renewsOn)} />
             <Row label="Owner email" value={company.ownerEmail} />
             <Row label="Open tickets" value={String(tickets.filter((t) => t.status !== 'resolved').length)} />
@@ -153,12 +196,19 @@ export function CompanyDetailPage() {
           <div className="panel p-5 flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-[#171A1F]">Recent payments</h2>
-              <button type="button" className="text-xs font-semibold text-[#1677FF] cursor-pointer" onClick={() => setTab('payments')}>
+              <button
+                type="button"
+                className="text-xs font-semibold text-[#1677FF] cursor-pointer"
+                onClick={() => setTab('payments')}
+              >
                 All
               </button>
             </div>
             {invoices.slice(0, 3).map((invoice) => (
-              <div key={invoice.id} className="flex items-center justify-between gap-3">
+              <div
+                key={invoice.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-[#EAEDF1] bg-[#F8FAFC]/70 px-3 py-2.5"
+              >
                 <div>
                   <p className="text-sm font-semibold text-[#171A1F]">{invoice.id}</p>
                   <p className="text-xs text-[#68707C]">{formatDate(invoice.date)}</p>
@@ -180,8 +230,7 @@ export function CompanyDetailPage() {
             <tr>
               <Th>Member</Th>
               <Th>Role</Th>
-              <Th>Last active</Th>
-              <Th className="text-right">Support</Th>
+              <Th>Join date</Th>
             </tr>
           </thead>
           <tbody>
@@ -199,23 +248,7 @@ export function CompanyDetailPage() {
                 <Td>
                   <Badge tone="slate">{user.role}</Badge>
                 </Td>
-                <Td className="text-[#68707C]">{formatDate(user.lastActive)}</Td>
-                <Td>
-                  <div className="flex justify-end">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => {
-                        const next = makeTempPassword()
-                        setTempPassword(next)
-                        setResetUser(user)
-                      }}
-                    >
-                      <KeyRound className="w-3.5 h-3.5" />
-                      Reset password
-                    </Button>
-                  </div>
-                </Td>
+                <Td className="text-[#68707C]">{formatDate(user.joined)}</Td>
               </tr>
             ))}
           </tbody>
@@ -269,7 +302,10 @@ export function CompanyDetailPage() {
                 <tr key={ticket.id}>
                   <Td>
                     <p className="font-semibold text-[#171A1F]">{ticket.subject}</p>
-                    <p className="text-xs text-[#68707C] mt-0.5">{ticket.requester}</p>
+                    <p className="text-xs text-[#68707C] mt-1 leading-relaxed line-clamp-2 max-w-md">
+                      {ticket.body.trim() || 'No description'}
+                    </p>
+                    <p className="text-[11px] text-[#94A3B8] mt-1.5">{ticket.requester}</p>
                   </Td>
                   <Td>
                     <Badge tone={ticket.priority === 'high' ? 'amber' : 'slate'}>{ticket.priority}</Badge>
@@ -300,6 +336,34 @@ export function CompanyDetailPage() {
       ) : null}
 
       <Modal
+        title={statusAction === 'restore' ? 'Restore access' : 'Suspend company'}
+        open={Boolean(statusAction)}
+        onClose={() => setStatusAction(null)}
+      >
+        {statusAction === 'suspend' ? (
+          <SuspendConfirm
+            companyName={company.name}
+            people={company.people}
+            onCancel={() => setStatusAction(null)}
+            onConfirm={() => applyStatus('suspended')}
+          />
+        ) : null}
+        {statusAction === 'restore' ? (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-[#68707C] leading-relaxed">
+              Restore access for <span className="font-semibold text-[#171A1F]">{company.name}</span>?
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setStatusAction(null)}>
+                Cancel
+              </Button>
+              <Button onClick={() => applyStatus('active')}>Restore access</Button>
+            </div>
+          </div>
+        ) : null}
+      </Modal>
+
+      <Modal
         title="Reset password"
         open={Boolean(resetUser)}
         onClose={() => {
@@ -310,9 +374,7 @@ export function CompanyDetailPage() {
         {resetUser ? (
           <div className="flex flex-col gap-4">
             <p className="text-sm text-[#68707C] leading-relaxed">
-              Create a temporary password for{' '}
-              <span className="font-semibold text-[#171A1F]">{resetUser.name}</span> ({resetUser.email}). Share it
-              once, then ask them to change it in the Lattice app.
+              Temporary password for {resetUser.name} ({resetUser.email})
             </p>
             <div className="rounded-xl bg-[#F2F2F7] px-3 py-2.5 font-mono text-sm font-bold text-[#171A1F]">
               {tempPassword}
@@ -340,6 +402,35 @@ export function CompanyDetailPage() {
           </div>
         ) : null}
       </Modal>
+    </div>
+  )
+}
+
+function MetricCard({
+  label,
+  value,
+  hint,
+  valueTone = 'slate',
+}: {
+  label: string
+  value: string
+  hint?: string
+  valueTone?: 'green' | 'amber' | 'red' | 'slate'
+}) {
+  const toneClass =
+    valueTone === 'green'
+      ? 'text-[#10A976]'
+      : valueTone === 'amber'
+        ? 'text-[#D97706]'
+        : valueTone === 'red'
+          ? 'text-[#E5484D]'
+          : 'text-[#171A1F]'
+
+  return (
+    <div className="rounded-2xl border border-[#EAEDF1] bg-white/90 px-4 py-3.5 flex flex-col gap-1.5 min-h-[88px]">
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#94A3B8]">{label}</p>
+      <p className={classNames('text-base font-bold tracking-tight leading-none', toneClass)}>{value}</p>
+      {hint ? <p className="text-[11px] text-[#94A3B8]">{hint}</p> : null}
     </div>
   )
 }

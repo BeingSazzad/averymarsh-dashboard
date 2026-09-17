@@ -23,8 +23,8 @@ export function useAuth() {
   const session = useAppSelector((state) => state.platform.session)
 
   const login = useCallback(
-    (email: string, password: string) => {
-      const next = authApi.login(email, password)
+    async (email: string, password: string) => {
+      const next = await authApi.login(email, password)
       localStorage.setItem(SESSION_KEY, JSON.stringify(next))
       dispatch(setSession(next))
       navigate(ROUTES.overview)

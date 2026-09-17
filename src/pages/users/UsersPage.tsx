@@ -4,8 +4,10 @@ import { Avatar } from '../../components/shared/Avatar'
 import { Badge } from '../../components/shared/Badge'
 import { CompanyMark } from '../../components/shared/CompanyMark'
 import { Input } from '../../components/ui/Input'
+import { Pagination } from '../../components/ui/Pagination'
 import { Table, Td, Th } from '../../components/ui/Table'
 import { useDebounce } from '../../hooks/useDebounce'
+import { usePagination } from '../../hooks/usePagination'
 import { formatDate } from '../../lib/utils'
 import { useAppSelector } from '../../store/hooks'
 
@@ -29,38 +31,47 @@ export function UsersPage() {
     )
   }, [users, q, companies])
 
+  const { page, setPage, pageCount, pageItems, total, from, to } = usePagination(rows, 10, q)
+
   return (
     <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Users"
-        subtitle={`${people} people on tenants · ${users.length} in this directory`}
+        subtitle={`${people} people · ${users.length} users`}
         action={
           <div className="w-72">
             <Input placeholder="Search name, email, company" value={query} onChange={(e) => setQuery(e.target.value)} />
           </div>
         }
       />
-      <Table>
+      <Table
+        footer={
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            total={total}
+            from={from}
+            to={to}
+            onPageChange={setPage}
+          />
+        }
+      >
         <thead>
           <tr>
             <Th>Person</Th>
             <Th>Company</Th>
             <Th>Role</Th>
-            <Th>Last active</Th>
+            <Th>Join date</Th>
           </tr>
         </thead>
         <tbody>
-          {rows.map((user) => {
+          {pageItems.map((user) => {
             const company = companies.find((item) => item.id === user.companyId)
             return (
               <tr key={user.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
                 <Td>
                   <div className="flex items-center gap-3">
-                    <Avatar
-                      src=""
-                      name={user.name}
-                      size={36}
-                    />
+                    <Avatar src="" name={user.name} size={36} />
                     <div>
                       <p className="font-semibold text-[#171A1F]">{user.name}</p>
                       <p className="text-xs text-[#68707C] mt-0.5">{user.email}</p>
@@ -80,10 +91,17 @@ export function UsersPage() {
                 <Td>
                   <Badge tone="slate">{user.role}</Badge>
                 </Td>
-                <Td className="text-[#68707C]">{formatDate(user.lastActive)}</Td>
+                <Td className="text-[#68707C]">{formatDate(user.joined)}</Td>
               </tr>
             )
           })}
+          {pageItems.length === 0 ? (
+            <tr>
+              <Td colSpan={4} className="text-center text-[#68707C] py-10">
+                No users match your search
+              </Td>
+            </tr>
+          ) : null}
         </tbody>
       </Table>
     </div>

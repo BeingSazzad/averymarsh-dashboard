@@ -1,17 +1,36 @@
 # Lattice Admin
 
-Web dashboard for the Lattice SaaS owner. Separate from the Lattice construction app.
-
-- App (mobile/web product): Construction-Project-Management
-- Dashboard (this repo): companies, seats, plans, billing, CMS, admins
+SaaS owner dashboard for Lattice. Separate from the construction app repo.
 
 ## Run
 
-```
+```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:5180/
+http://localhost:5180/ · demo: `sazzad@lattice.build` / `lattice`
 
-Demo login: `sazzad@lattice.build` / `lattice`
+## Vercel
+
+- Build: `npm run build`
+- Output: `dist`
+- SPA: `vercel.json`
+- Env: `.env.example` (`VITE_API_BASE`, `VITE_USE_MOCK_API`)
+
+## Structure
+
+```
+src/
+  main.tsx / App.tsx
+  router/
+  pages/           # route screens only
+  components/
+    ui/ layout/ shared/ dashboard/
+  store/
+  services/        # api + endpoints (backend-ready)
+  hooks/
+  lib/             # utils, seed, factories, status
+  types/ config/ constants/
+  styles/ assets/
+```

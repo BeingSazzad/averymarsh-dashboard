@@ -4,7 +4,7 @@ import { ROUTES } from '../constants/routes'
 import { readSession } from '../hooks/useAuth'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { setSession } from '../store/platformSlice'
-import { AppShell } from '../components/layout/Sidebar'
+import { AppShell } from '../components/layout/AppShell'
 import { Topbar } from '../components/layout/Topbar'
 
 export function PrivateRoute() {

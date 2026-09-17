@@ -1,12 +1,13 @@
 import type { ReactNode, TdHTMLAttributes, ThHTMLAttributes } from 'react'
 import { classNames } from '../../lib/utils'
 
-export function Table({ children }: { children: ReactNode }) {
+export function Table({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
   return (
     <div className="panel overflow-hidden fade-up">
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">{children}</table>
       </div>
+      {footer}
     </div>
   )
 }

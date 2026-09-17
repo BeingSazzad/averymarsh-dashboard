@@ -3,7 +3,10 @@ import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
 import { store } from './store'
 import App from './App.tsx'
-import './index.css'
+import { env } from './config/env'
+import './styles/index.css'
+
+document.title = env.appName
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -7,7 +7,8 @@ import { RichTextEditor } from '../../components/ui/RichTextEditor'
 import { Modal } from '../../components/ui/Modal'
 import { Badge } from '../../components/shared/Badge'
 import { classNames } from '../../lib/utils'
-import { deleteFaq, newFaq, saveLegal, upsertFaq } from '../../store/platformSlice'
+import { deleteFaq, saveLegal, upsertFaq } from '../../store/platformSlice'
+import { newFaq } from '../../lib/factories'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import type { FaqItem, LegalDoc } from '../../types/common.types'
 
@@ -32,7 +33,7 @@ export function CmsPage() {
 
   return (
     <div className="flex flex-col gap-5 w-full">
-      <PageHeader title="CMS" subtitle="Content customers see in the Lattice app and website" />
+      <PageHeader title="CMS" />
 
       <div className="flex flex-wrap gap-1 bg-[#EAEDF1] p-1 rounded-2xl w-fit">
         {TABS.map((item) => {

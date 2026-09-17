@@ -3,13 +3,14 @@ import type { CompanyStatus, InvoiceStatus, TicketStatus } from '../types/common
 export function companyTone(status: CompanyStatus) {
   if (status === 'active') return 'green' as const
   if (status === 'trial') return 'blue' as const
-  if (status === 'past_due') return 'amber' as const
+  if (status === 'past_due' || status === 'suspended') return 'amber' as const
   return 'red' as const
 }
 
 export function companyLabel(status: CompanyStatus) {
   if (status === 'past_due') return 'Past due'
   if (status === 'trial') return 'Trial'
+  if (status === 'suspended') return 'Suspended'
   if (status === 'canceled') return 'Canceled'
   return 'Active'
 }

@@ -1,37 +1,38 @@
 import { useState } from 'react'
-import { Check, Wallet } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
+import { Badge } from '../../components/shared/Badge'
 import { Button } from '../../components/ui/Button'
-import { Input, TextArea } from '../../components/ui/Input'
+import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
+import { RichTextEditor } from '../../components/ui/RichTextEditor'
 import { money } from '../../lib/utils'
-import { deletePlan, newPlan, upsertPlan } from '../../store/platformSlice'
+import { featuresToHtml, htmlToFeatures } from '../../lib/planFeatures'
+import { deletePlan, upsertPlan } from '../../store/platformSlice'
+import { newPlan } from '../../lib/factories'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import type { Plan } from '../../types/common.types'
-import { Badge } from '../../components/shared/Badge'
 
 export function PlansPage() {
   const plans = useAppSelector((state) => state.platform.plans)
   const companies = useAppSelector((state) => state.platform.companies)
   const dispatch = useAppDispatch()
   const [draft, setDraft] = useState<Plan | null>(null)
-  const [featuresText, setFeaturesText] = useState('')
+  const [featuresHtml, setFeaturesHtml] = useState('')
 
   const openDraft = (plan: Plan) => {
     setDraft(plan)
-    setFeaturesText(plan.features.join('\n'))
+    setFeaturesHtml(featuresToHtml(plan.features))
   }
 
   return (
     <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Plans"
-        subtitle="What companies buy · benefits mapped to Lattice app modules"
         action={
           <Button
             onClick={() => {
-              const plan = newPlan()
-              openDraft(plan)
+              openDraft(newPlan())
             }}
           >
             Add plan
@@ -39,50 +40,60 @@ export function PlansPage() {
         }
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
         {plans.map((plan) => {
           const tenants = companies.filter((company) => company.planId === plan.id).length
+
           return (
-            <div key={plan.id} className="panel panel-hover p-5 flex flex-col fade-up h-full">
-              <div className="flex items-start justify-between gap-3">
-                <span className="w-9 h-9 rounded-xl bg-[#EAF3FF] text-[#1677FF] flex items-center justify-center">
-                  <Wallet className="w-4 h-4" />
-                </span>
-                <Badge tone={plan.active ? 'green' : 'slate'}>{plan.active ? 'Live' : 'Off'}</Badge>
+            <article key={plan.id} className="panel flex flex-col fade-up overflow-hidden">
+              <div className="px-5 pt-5 pb-4 bg-white">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-lg font-bold text-[#171A1F] tracking-tight leading-none">{plan.name}</h2>
+                  <Badge tone={plan.active ? 'green' : 'slate'}>{plan.active ? 'Live' : 'Off'}</Badge>
+                </div>
+                {plan.description ? (
+                  <p className="text-sm text-[#68707C] mt-2 leading-snug">{plan.description}</p>
+                ) : null}
+
+                <div className="mt-4 flex items-end gap-1.5">
+                  <p className="text-[32px] font-bold text-[#171A1F] tracking-tight tabular-nums leading-none">
+                    {money(plan.monthlyPrice)}
+                  </p>
+                  <span className="text-sm font-medium text-[#68707C] pb-1">/mo</span>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  <MetaChip label={`${money(plan.yearlyPrice)} /yr`} />
+                  <MetaChip label={`${plan.seats} seats`} />
+                  <MetaChip label={`${tenants} ${tenants === 1 ? 'company' : 'companies'}`} />
+                </div>
               </div>
 
-              <h2 className="text-base font-bold text-[#171A1F] mt-4">{plan.name}</h2>
-              <p className="text-sm text-[#68707C] mt-1 leading-snug min-h-[40px]">{plan.description}</p>
+              <div className="px-5 py-4 border-t border-[#EAEDF1] flex-1 flex flex-col">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#94A3B8] mb-3">
+                  Includes
+                </p>
+                <ul className="flex flex-col gap-2">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2.5 text-sm text-[#171A1F]">
+                      <span className="mt-0.5 w-4 h-4 rounded-full bg-[#EAF3FF] text-[#1677FF] flex items-center justify-center shrink-0">
+                        <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                      </span>
+                      <span className="leading-snug">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-              <p className="text-2xl font-bold text-[#171A1F] mt-4 tabular-nums">
-                {money(plan.monthlyPrice)}
-                <span className="text-sm font-medium text-[#68707C]"> /mo</span>
-              </p>
-              <p className="text-xs text-[#68707C] mt-1">
-                {money(plan.yearlyPrice)} /yr · {plan.seats} seats · {tenants}{' '}
-                {tenants === 1 ? 'company' : 'companies'}
-              </p>
-
-              <ul className="mt-5 flex flex-col gap-2.5 flex-1">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5 text-sm text-[#171A1F]">
-                    <span className="mt-0.5 w-4 h-4 rounded-full bg-[#EAF3FF] text-[#1677FF] flex items-center justify-center shrink-0">
-                      <Check className="w-2.5 h-2.5" strokeWidth={3} />
-                    </span>
-                    <span className="leading-snug">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex gap-2 mt-5 pt-4 border-t border-[#EAEDF1]">
-                <Button size="sm" variant="secondary" onClick={() => openDraft(plan)}>
+              <div className="px-5 py-3.5 border-t border-[#EAEDF1] bg-[#F8FAFC]/80 flex gap-2 mt-auto">
+                <Button size="sm" variant="secondary" className="flex-1" onClick={() => openDraft(plan)}>
                   Edit
                 </Button>
                 <Button size="sm" variant="danger" onClick={() => dispatch(deletePlan(plan.id))}>
                   Delete
                 </Button>
               </div>
-            </div>
+            </article>
           )
         })}
       </div>
@@ -102,16 +113,18 @@ export function PlansPage() {
               dispatch(
                 upsertPlan({
                   ...draft,
-                  features: featuresText
-                    .split('\n')
-                    .map((line) => line.trim())
-                    .filter(Boolean),
+                  features: htmlToFeatures(featuresHtml),
                 })
               )
               setDraft(null)
             }}
           >
-            <Input label="Name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            <Input
+              label="Name"
+              value={draft.name}
+              onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+              placeholder="Plan name"
+            />
             <Input
               label="Short description"
               value={draft.description}
@@ -138,12 +151,7 @@ export function PlansPage() {
                 onChange={(e) => setDraft({ ...draft, seats: Number(e.target.value) })}
               />
             </div>
-            <TextArea
-              label="Benefits (one per line)"
-              value={featuresText}
-              onChange={(e) => setFeaturesText(e.target.value)}
-              placeholder={'Daily field logs\nBudget ledger\nPay apps & draws'}
-            />
+            <RichTextEditor label="Benefits" value={featuresHtml} onChange={setFeaturesHtml} />
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -157,5 +165,13 @@ export function PlansPage() {
         ) : null}
       </Modal>
     </div>
+  )
+}
+
+function MetaChip({ label }: { label: string }) {
+  return (
+    <span className="inline-flex h-7 items-center rounded-lg bg-[#F2F2F7] px-2.5 text-[11px] font-semibold text-[#68707C]">
+      {label}
+    </span>
   )
 }

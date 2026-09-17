@@ -7,7 +7,6 @@ import { formatDate } from '../../lib/utils'
 import { markAllNotificationsRead, markNotificationRead } from '../../store/platformSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import type { NotificationKind } from '../../types/common.types'
-import { ROUTES } from '../../constants/routes'
 
 function kindMeta(kind: NotificationKind) {
   if (kind === 'payment') return { icon: CreditCard, tone: 'blue' as const, label: 'Payment' }
@@ -26,7 +25,7 @@ export function NotificationsPage() {
     <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Notifications"
-        subtitle={unread ? `${unread} unread · platform alerts` : 'You are caught up'}
+        subtitle={unread ? `${unread} unread` : undefined}
         action={
           <Button
             variant="secondary"
@@ -93,14 +92,6 @@ export function NotificationsPage() {
           })}
         </ul>
       )}
-
-      <p className="text-xs text-[#94A3B8]">
-        Tip: grant company access from{' '}
-        <Link to={ROUTES.companies} className="text-[#1677FF] font-semibold hover:underline">
-          Companies
-        </Link>
-        .
-      </p>
     </div>
   )
 }

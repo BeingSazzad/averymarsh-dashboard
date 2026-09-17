@@ -1,31 +1,10 @@
-import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
-import {
-  Building2,
-  CreditCard,
-  FileText,
-  LayoutDashboard,
-  LifeBuoy,
-  LogOut,
-  Shield,
-  Users,
-  Wallet,
-} from 'lucide-react'
+import { LogOut } from 'lucide-react'
+import { NAV_ITEMS } from '../../constants/nav'
 import { ROUTES } from '../../constants/routes'
 import { classNames } from '../../lib/utils'
 import { useAuth } from '../../hooks/useAuth'
 import { LatticeLogo } from '../shared/LatticeLogo'
-
-export const NAV_ITEMS = [
-  { to: ROUTES.overview, label: 'Overview', icon: LayoutDashboard },
-  { to: ROUTES.companies, label: 'Companies', icon: Building2 },
-  { to: ROUTES.users, label: 'Users', icon: Users },
-  { to: ROUTES.plans, label: 'Plans', icon: Wallet },
-  { to: ROUTES.billing, label: 'Billing', icon: CreditCard },
-  { to: ROUTES.support, label: 'Support', icon: LifeBuoy },
-  { to: ROUTES.cms, label: 'CMS', icon: FileText },
-  { to: ROUTES.admins, label: 'Admins', icon: Shield },
-]
 
 export function Sidebar() {
   const { logout } = useAuth()
@@ -111,19 +90,6 @@ export function MobileNav() {
       >
         Sign out
       </button>
-    </div>
-  )
-}
-
-interface ShellProps {
-  children: ReactNode
-}
-
-export function AppShell({ children }: ShellProps) {
-  return (
-    <div className="h-screen flex overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 min-w-0 flex flex-col">{children}</div>
     </div>
   )
 }

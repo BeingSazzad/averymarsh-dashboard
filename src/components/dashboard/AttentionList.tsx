@@ -1,16 +1,13 @@
 import { Link } from 'react-router-dom'
-import { AlertTriangle, RefreshCw } from 'lucide-react'
-import { ROUTES } from '../../constants/routes'
+import { AlertTriangle } from 'lucide-react'
+import { ROUTES, companyPath } from '../../constants/routes'
 import { companyLabel, companyTone } from '../../lib/status'
 import { formatDate } from '../../lib/utils'
-import { renewCompany } from '../../store/platformSlice'
-import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { useAppSelector } from '../../store/hooks'
 import { Badge } from '../shared/Badge'
 import { CompanyMark } from '../shared/CompanyMark'
-import { Button } from '../ui/Button'
 
 export function AttentionList() {
-  const dispatch = useAppDispatch()
   const companies = useAppSelector((state) =>
     state.platform.companies.filter((company) => company.status === 'past_due' || company.status === 'trial')
   )
@@ -43,16 +40,17 @@ export function AttentionList() {
             >
               <CompanyMark name={company.name} logo={company.logo} size={36} />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-[#171A1F] truncate">{company.name}</p>
+                <Link
+                  to={companyPath(company.id)}
+                  className="text-sm font-semibold text-[#171A1F] truncate hover:text-[#1677FF] block"
+                >
+                  {company.name}
+                </Link>
                 <p className="text-xs text-[#68707C] mt-0.5">
                   {company.people} people · renews {formatDate(company.renewsOn)}
                 </p>
               </div>
               <Badge tone={companyTone(company.status)}>{companyLabel(company.status)}</Badge>
-              <Button size="sm" variant="secondary" onClick={() => dispatch(renewCompany(company.id))}>
-                <RefreshCw className="w-3.5 h-3.5" />
-                Renew
-              </Button>
             </li>
           ))}
         </ul>

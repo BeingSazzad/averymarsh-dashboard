@@ -1,37 +1,39 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, KeyRound, Pencil, Plus, RefreshCw, Trash2, Users } from 'lucide-react'
+import { Eye, PauseCircle, Pencil, PlayCircle, Plus, Trash2 } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Badge } from '../../components/shared/Badge'
 import { CompanyMark } from '../../components/shared/CompanyMark'
 import { SeatMeter } from '../../components/shared/SeatMeter'
+import { SuspendConfirm } from '../../components/shared/SuspendConfirm'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
 import { Input } from '../../components/ui/Input'
 import { Modal } from '../../components/ui/Modal'
+import { Pagination } from '../../components/ui/Pagination'
 import { Select } from '../../components/ui/Select'
 import { Table, Td, Th } from '../../components/ui/Table'
 import { companyPath } from '../../constants/routes'
+import { usePagination } from '../../hooks/usePagination'
 import { companyLabel, companyTone } from '../../lib/status'
 import { classNames, formatDate, money } from '../../lib/utils'
 import {
   deleteCompany,
   grantAccess,
   renameCompany,
-  renewCompany,
+  setCompanyStatus,
 } from '../../store/platformSlice'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import type { AccessMethod, Company } from '../../types/common.types'
 
 type ModalMode =
-  | { type: 'rename' | 'delete'; company: Company }
+  | { type: 'rename' | 'delete' | 'suspend'; company: Company }
   | { type: 'grant' }
 
 export function CompaniesPage() {
   const navigate = useNavigate()
   const companies = useAppSelector((state) => state.platform.companies)
   const plans = useAppSelector((state) => state.platform.plans)
-  const users = useAppSelector((state) => state.platform.users)
   const dispatch = useAppDispatch()
   const [modal, setModal] = useState<ModalMode | null>(null)
   const [renameValue, setRenameValue] = useState('')
@@ -56,13 +58,15 @@ export function CompaniesPage() {
     )
   }, [companies, plans, query])
 
+  const { page, setPage, pageCount, pageItems, total, from, to } = usePagination(rows, 10, query)
+
   const totalPeople = companies.reduce((sum, company) => sum + company.people, 0)
 
   return (
     <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Companies"
-        subtitle={`${companies.length} tenants · ${totalPeople} people on Lattice`}
+        subtitle={`${companies.length} companies · ${totalPeople} people`}
         action={
           <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
             <div className="w-full sm:w-56">
@@ -89,26 +93,23 @@ export function CompaniesPage() {
         }
       />
 
-      <div className="panel p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
-        <span className="w-10 h-10 rounded-2xl bg-[#EAF3FF] text-[#1677FF] flex items-center justify-center shrink-0">
-          <KeyRound className="w-4 h-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-[#171A1F]">After you sell Lattice</p>
-          <p className="text-sm text-[#68707C] mt-0.5 leading-relaxed">
-            Use <span className="font-semibold text-[#171A1F]">Grant access</span> to create the company,
-            pick a plan, then either email an invite or hand them a temporary login for the Lattice app.
-          </p>
-        </div>
-      </div>
-
-      <Table>
+      <Table
+        footer={
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            total={total}
+            from={from}
+            to={to}
+            onPageChange={setPage}
+          />
+        }
+      >
         <thead>
           <tr>
             <Th>Company</Th>
             <Th>Plan</Th>
             <Th>People</Th>
-            <Th>Access</Th>
             <Th>MRR</Th>
             <Th>Renews</Th>
             <Th>Status</Th>
@@ -116,8 +117,7 @@ export function CompaniesPage() {
           </tr>
         </thead>
         <tbody>
-          {rows.map((company) => {
-            const directoryCount = users.filter((user) => user.companyId === company.id).length
+          {pageItems.map((company) => {
             return (
               <tr key={company.id} className="hover:bg-[#F8FAFC]/80 transition-colors">
                 <Td>
@@ -135,18 +135,7 @@ export function CompaniesPage() {
                   {plans.find((plan) => plan.id === company.planId)?.name ?? '—'}
                 </Td>
                 <Td>
-                  <div className="flex flex-col gap-1">
-                    <SeatMeter people={company.people} seats={company.seats} />
-                    <p className="text-[11px] text-[#68707C] flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {directoryCount} in directory
-                    </p>
-                  </div>
-                </Td>
-                <Td>
-                  <Badge tone={company.accessMethod === 'invite' ? 'blue' : 'slate'}>
-                    {company.accessMethod === 'invite' ? 'Invite' : 'Login'}
-                  </Badge>
+                  <SeatMeter people={company.people} seats={company.seats} />
                 </Td>
                 <Td className="font-bold tabular-nums text-[#171A1F]">{money(company.mrr)}</Td>
                 <Td className="text-[#68707C] whitespace-nowrap">{formatDate(company.renewsOn)}</Td>
@@ -171,9 +160,23 @@ export function CompaniesPage() {
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </IconButton>
-                    <IconButton label="Renew" onClick={() => dispatch(renewCompany(company.id))}>
-                      <RefreshCw className="w-3.5 h-3.5" />
-                    </IconButton>
+                    {company.status === 'suspended' ? (
+                      <IconButton
+                        label="Restore access"
+                        tone="blue"
+                        onClick={() => dispatch(setCompanyStatus({ id: company.id, status: 'active' }))}
+                      >
+                        <PlayCircle className="w-3.5 h-3.5" />
+                      </IconButton>
+                    ) : (
+                      <IconButton
+                        label="Suspend"
+                        tone="danger"
+                        onClick={() => setModal({ type: 'suspend', company })}
+                      >
+                        <PauseCircle className="w-3.5 h-3.5" />
+                      </IconButton>
+                    )}
                     <IconButton
                       label="Delete"
                       tone="danger"
@@ -186,6 +189,13 @@ export function CompaniesPage() {
               </tr>
             )
           })}
+          {pageItems.length === 0 ? (
+            <tr>
+              <Td colSpan={7} className="text-center text-[#68707C] py-10">
+                No companies match your search
+              </Td>
+            </tr>
+          ) : null}
         </tbody>
       </Table>
 
@@ -197,7 +207,9 @@ export function CompaniesPage() {
               ? 'Rename company'
               : modal?.type === 'delete'
                 ? 'Delete company'
-                : ''
+                : modal?.type === 'suspend'
+                  ? 'Suspend company'
+                  : ''
         }
         open={Boolean(modal)}
         onClose={() => setModal(null)}
@@ -219,22 +231,19 @@ export function CompaniesPage() {
                 dispatch(grantAccess(grant))
                 setGrantDone(
                   grant.accessMethod === 'invite'
-                    ? `Invite queued for ${grant.ownerEmail}. They open Lattice, accept, and set their password.`
-                    : `Login ready for ${grant.ownerEmail}. Temporary password: ${grant.tempPassword}. Share it once, then ask them to change it.`
+                    ? `Invite sent to ${grant.ownerEmail}`
+                    : `Login ready · ${grant.ownerEmail} · ${grant.tempPassword}`
                 )
               }}
             >
-              <p className="text-sm text-[#68707C] leading-relaxed">
-                You sold Lattice. Create the company workspace and give the owner a way into the app.
-              </p>
               <Input
                 label="Company name"
                 value={grant.companyName}
                 onChange={(e) => setGrant({ ...grant, companyName: e.target.value })}
-                placeholder="e.g. Coastal Build Co"
+                placeholder="Company name"
               />
               <Select
-                label="Subscription plan"
+                label="Plan"
                 value={grant.planId}
                 onChange={(e) => setGrant({ ...grant, planId: e.target.value })}
                 options={plans.map((plan) => ({
@@ -247,32 +256,22 @@ export function CompaniesPage() {
                   label="Owner name"
                   value={grant.ownerName}
                   onChange={(e) => setGrant({ ...grant, ownerName: e.target.value })}
-                  placeholder="Jordan Lee"
                 />
                 <Input
                   label="Owner email"
                   type="email"
                   value={grant.ownerEmail}
                   onChange={(e) => setGrant({ ...grant, ownerEmail: e.target.value })}
-                  placeholder="owner@company.com"
                 />
               </div>
 
               <div>
-                <p className="text-xs font-semibold text-[#171A1F] mb-1.5">How they get in</p>
+                <p className="text-xs font-semibold text-[#171A1F] mb-1.5">Access</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {(
                     [
-                      {
-                        id: 'invite' as const,
-                        title: 'Send invite',
-                        body: 'Email a secure link. Best default.',
-                      },
-                      {
-                        id: 'credentials' as const,
-                        title: 'Create login',
-                        body: 'You set a temporary password now.',
-                      },
+                      { id: 'invite' as const, title: 'Send invite' },
+                      { id: 'credentials' as const, title: 'Create login' },
                     ] as const
                   ).map((option) => (
                     <button
@@ -287,7 +286,6 @@ export function CompaniesPage() {
                       )}
                     >
                       <p className="text-sm font-bold text-[#171A1F]">{option.title}</p>
-                      <p className="text-xs text-[#68707C] mt-1">{option.body}</p>
                     </button>
                   ))}
                 </div>
@@ -352,6 +350,18 @@ export function CompaniesPage() {
               </Button>
             </div>
           </div>
+        ) : null}
+
+        {modal?.type === 'suspend' ? (
+          <SuspendConfirm
+            companyName={modal.company.name}
+            people={modal.company.people}
+            onCancel={() => setModal(null)}
+            onConfirm={() => {
+              dispatch(setCompanyStatus({ id: modal.company.id, status: 'suspended' }))
+              setModal(null)
+            }}
+          />
         ) : null}
       </Modal>
     </div>

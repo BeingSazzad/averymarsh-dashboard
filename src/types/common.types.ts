@@ -1,4 +1,4 @@
-export type CompanyStatus = 'trial' | 'active' | 'past_due' | 'canceled'
+export type CompanyStatus = 'trial' | 'active' | 'past_due' | 'suspended' | 'canceled'
 export type InvoiceStatus = 'paid' | 'failed' | 'open'
 export type AdminStatus = 'active' | 'invited'
 export type AccessMethod = 'invite' | 'credentials'
@@ -34,7 +34,7 @@ export interface SeatUser {
   email: string
   companyId: string
   role: string
-  lastActive: string
+  joined: string
 }
 
 export interface Plan {
@@ -74,7 +74,7 @@ export interface Admin {
   id: string
   name: string
   email: string
-  role: 'Owner' | 'Admin' | 'Finance'
+  role: 'Super Admin' | 'Admin'
   status: AdminStatus
   avatar: string
 }

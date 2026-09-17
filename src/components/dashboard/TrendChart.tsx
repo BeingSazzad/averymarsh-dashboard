@@ -10,6 +10,7 @@ import {
 } from 'recharts'
 import type { MonthlyPoint } from '../../types/common.types'
 import { compactMoney } from '../../lib/utils'
+import { YearFilter } from './YearFilter'
 
 interface TrendChartProps {
   data: MonthlyPoint[]
@@ -19,23 +20,20 @@ interface TrendChartProps {
 export function TrendChart({ data, year }: TrendChartProps) {
   return (
     <div className="panel p-5 md:p-6 fade-up">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#94A3B8]">Platform pulse</p>
-          <h2 className="text-lg font-bold text-[#171A1F] mt-1 tracking-tight">{year} overview</h2>
-          <p className="text-sm text-[#68707C] mt-1">
-            One view of app income and people growing on Lattice.
-          </p>
-        </div>
-        <div className="flex items-center gap-5 text-xs font-semibold">
-          <span className="flex items-center gap-2 text-[#1677FF]">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#1677FF] shadow-[0_0_0_3px_rgba(22,119,255,0.15)]" />
-            Income
-          </span>
-          <span className="flex items-center gap-2 text-[#171A1F]">
-            <span className="w-4 h-0.5 rounded-full bg-[#171A1F]" />
-            People
-          </span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+        <h2 className="text-lg font-bold text-[#171A1F] tracking-tight">{year} overview</h2>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-5 text-xs font-semibold">
+            <span className="flex items-center gap-2 text-[#1677FF]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#1677FF] shadow-[0_0_0_3px_rgba(22,119,255,0.15)]" />
+              Revenue
+            </span>
+            <span className="flex items-center gap-2 text-[#171A1F]">
+              <span className="w-4 h-0.5 rounded-full bg-[#171A1F]" />
+              Subscriber
+            </span>
+          </div>
+          <YearFilter />
         </div>
       </div>
 
@@ -65,7 +63,7 @@ export function TrendChart({ data, year }: TrendChartProps) {
               tickFormatter={(value) => compactMoney(Number(value))}
             />
             <YAxis
-              yAxisId="people"
+              yAxisId="subscriber"
               orientation="right"
               tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 600 }}
               axisLine={false}
@@ -83,8 +81,8 @@ export function TrendChart({ data, year }: TrendChartProps) {
               labelStyle={{ color: '#68707C', fontWeight: 700, marginBottom: 4 }}
               formatter={(value, name) => {
                 const n = Number(value)
-                if (name === 'income') return [compactMoney(n), 'Income']
-                return [n, 'People']
+                if (name === 'income') return [compactMoney(n), 'Revenue']
+                return [n, 'Subscriber']
               }}
             />
             <Area
@@ -97,9 +95,9 @@ export function TrendChart({ data, year }: TrendChartProps) {
               isAnimationActive={false}
             />
             <Line
-              yAxisId="people"
+              yAxisId="subscriber"
               type="monotone"
-              dataKey="users"
+              dataKey="subscriptions"
               stroke="#171A1F"
               strokeWidth={2}
               dot={false}

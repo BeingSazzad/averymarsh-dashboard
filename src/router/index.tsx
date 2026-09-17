@@ -19,12 +19,12 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 
 export const router = createBrowserRouter([
   { path: ROUTES.login, element: <LoginPage /> },
-  { path: '/register', element: <RegisterPage /> },
+  { path: ROUTES.register, element: <RegisterPage /> },
   {
     element: <PrivateRoute />,
     children: [
       { path: ROUTES.overview, element: <DashboardPage /> },
-      { path: '/analytics', element: <AnalyticsPage /> },
+      { path: ROUTES.analytics, element: <AnalyticsPage /> },
       { path: ROUTES.companies, element: <CompaniesPage /> },
       { path: '/companies/:companyId', element: <CompanyDetailPage /> },
       { path: ROUTES.users, element: <UsersPage /> },
