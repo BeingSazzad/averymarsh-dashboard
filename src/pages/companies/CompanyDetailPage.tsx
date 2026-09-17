@@ -290,7 +290,8 @@ export function CompanyDetailPage() {
           <Table>
             <thead>
               <tr>
-                <Th>Ticket</Th>
+                <Th>Ticket #</Th>
+                <Th>Subject</Th>
                 <Th>Priority</Th>
                 <Th>Status</Th>
                 <Th>Updated</Th>
@@ -300,12 +301,12 @@ export function CompanyDetailPage() {
             <tbody>
               {tickets.map((ticket) => (
                 <tr key={ticket.id}>
+                  <Td className="font-semibold tabular-nums whitespace-nowrap">{ticket.number}</Td>
                   <Td>
                     <p className="font-semibold text-[#171A1F]">{ticket.subject}</p>
                     <p className="text-xs text-[#68707C] mt-1 leading-relaxed line-clamp-2 max-w-md">
                       {ticket.body.trim() || 'No description'}
                     </p>
-                    <p className="text-[11px] text-[#94A3B8] mt-1.5">{ticket.requester}</p>
                   </Td>
                   <Td>
                     <Badge tone={ticket.priority === 'high' ? 'amber' : 'slate'}>{ticket.priority}</Badge>

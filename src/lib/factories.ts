@@ -29,13 +29,23 @@ export function newAdmin(): Admin {
   }
 }
 
-export function newTicket(companyId: string): SupportTicket {
+export function nextTicketNumber(existing: { number: string }[]): string {
+  const nums = existing.map((ticket) => {
+    const match = ticket.number.match(/(\d+)$/)
+    return match ? Number(match[1]) : 0
+  })
+  const next = Math.max(200, ...nums, 0) + 1
+  return `TKT-${next}`
+}
+
+export function newTicket(companyId: string, number: string, requester = ''): SupportTicket {
   const today = new Date().toISOString().slice(0, 10)
   return {
     id: uid('tkt'),
+    number,
     companyId,
     subject: '',
-    requester: '',
+    requester,
     status: 'open',
     priority: 'normal',
     createdAt: today,

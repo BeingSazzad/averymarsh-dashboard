@@ -12,7 +12,7 @@ import { Table, Td, Th } from '../../components/ui/Table'
 import { ticketTone } from '../../lib/status'
 import { formatDate } from '../../lib/utils'
 import { setTicketStatus, upsertTicket } from '../../store/platformSlice'
-import { newTicket } from '../../lib/factories'
+import { newTicket, nextTicketNumber } from '../../lib/factories'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import type { SupportTicket, TicketPriority, TicketStatus } from '../../types/common.types'
 
@@ -37,13 +37,24 @@ export function SupportPage() {
 
   const openCount = tickets.filter((ticket) => ticket.status === 'open' || ticket.status === 'pending').length
 
+  const startNewTicket = () => {
+    const company = companies[0]
+    setDraft(
+      newTicket(
+        company?.id ?? '',
+        nextTicketNumber(tickets),
+        company?.ownerEmail ?? ''
+      )
+    )
+  }
+
   return (
     <div className="flex flex-col gap-5 w-full">
       <PageHeader
         title="Support"
         subtitle={`${openCount} open`}
         action={
-          <Button onClick={() => setDraft(newTicket(companies[0]?.id ?? ''))}>
+          <Button onClick={startNewTicket}>
             <Plus className="w-4 h-4" />
             New ticket
           </Button>
@@ -68,7 +79,8 @@ export function SupportPage() {
       <Table>
         <thead>
           <tr>
-            <Th>Ticket</Th>
+            <Th>Ticket #</Th>
+            <Th>Subject</Th>
             <Th>Company</Th>
             <Th>Priority</Th>
             <Th>Status</Th>
@@ -85,12 +97,14 @@ export function SupportPage() {
                 className="hover:bg-[#F8FAFC]/80 cursor-pointer"
                 onClick={() => setViewing(ticket)}
               >
+                <Td className="font-semibold tabular-nums text-[#171A1F] whitespace-nowrap">
+                  {ticket.number}
+                </Td>
                 <Td>
                   <p className="font-semibold text-[#171A1F]">{ticket.subject}</p>
                   <p className="text-xs text-[#68707C] mt-1 leading-relaxed line-clamp-2 max-w-md">
                     {preview(ticket.body)}
                   </p>
-                  <p className="text-[11px] text-[#94A3B8] mt-1.5">{ticket.requester}</p>
                 </Td>
                 <Td>
                   {company ? (
@@ -139,11 +153,18 @@ export function SupportPage() {
               </tr>
             )
           })}
+          {rows.length === 0 ? (
+            <tr>
+              <Td colSpan={7} className="text-center text-[#68707C] py-10">
+                No tickets in this filter
+              </Td>
+            </tr>
+          ) : null}
         </tbody>
       </Table>
 
       <Modal
-        title={viewing?.subject || 'Ticket'}
+        title={viewing ? `${viewing.number} · ${viewing.subject}` : 'Ticket'}
         open={Boolean(viewing)}
         onClose={() => setViewing(null)}
         wide
@@ -166,21 +187,39 @@ export function SupportPage() {
         ) : null}
       </Modal>
 
-      <Modal title="New support ticket" open={Boolean(draft)} onClose={() => setDraft(null)} wide>
+      <Modal
+        title={draft ? `New ticket · ${draft.number}` : 'New ticket'}
+        open={Boolean(draft)}
+        onClose={() => setDraft(null)}
+        wide
+      >
         {draft ? (
           <form
             className="flex flex-col gap-3"
             onSubmit={(event) => {
               event.preventDefault()
-              if (!draft.subject.trim() || !draft.companyId) return
-              dispatch(upsertTicket(draft))
+              if (!draft.subject.trim() || !draft.companyId || !draft.body.trim()) return
+              const company = companies.find((item) => item.id === draft.companyId)
+              dispatch(
+                upsertTicket({
+                  ...draft,
+                  requester: company?.ownerEmail ?? draft.requester,
+                })
+              )
               setDraft(null)
             }}
           >
             <Select
               label="Company"
               value={draft.companyId}
-              onChange={(e) => setDraft({ ...draft, companyId: e.target.value })}
+              onChange={(e) => {
+                const company = companies.find((item) => item.id === e.target.value)
+                setDraft({
+                  ...draft,
+                  companyId: e.target.value,
+                  requester: company?.ownerEmail ?? '',
+                })
+              }}
               options={companies.map((company) => ({ value: company.id, label: company.name }))}
             />
             <Input
@@ -194,12 +233,6 @@ export function SupportPage() {
               value={draft.body}
               onChange={(e) => setDraft({ ...draft, body: e.target.value })}
               placeholder="What happened, who is affected, and what you already tried…"
-            />
-            <Input
-              label="Requester email"
-              type="email"
-              value={draft.requester}
-              onChange={(e) => setDraft({ ...draft, requester: e.target.value })}
             />
             <Select
               label="Priority"
@@ -240,6 +273,7 @@ function TicketDetail({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-bold tabular-nums text-[#171A1F]">{ticket.number}</span>
         <Badge tone={ticketTone(ticket.status)}>{ticket.status}</Badge>
         <Badge tone={ticket.priority === 'high' ? 'amber' : 'slate'}>{`${ticket.priority} priority`}</Badge>
         <span className="text-xs text-[#68707C]">Updated {formatDate(ticket.updatedAt)}</span>
@@ -252,21 +286,18 @@ function TicketDetail({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#94A3B8]">Requester</p>
-          <p className="mt-1 font-medium text-[#171A1F]">{ticket.requester || '—'}</p>
-        </div>
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#94A3B8]">Company</p>
-          {companyName ? (
-            <Link to={`/companies/${companyId}`} className="mt-1 inline-block font-semibold text-[#1677FF] hover:underline">
-              {companyName}
-            </Link>
-          ) : (
-            <p className="mt-1 text-[#68707C]">—</p>
-          )}
-        </div>
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#94A3B8]">Company</p>
+        {companyName ? (
+          <Link
+            to={`/companies/${companyId}`}
+            className="mt-1 inline-block font-semibold text-[#1677FF] hover:underline"
+          >
+            {companyName}
+          </Link>
+        ) : (
+          <p className="mt-1 text-[#68707C]">—</p>
+        )}
       </div>
 
       <div className="flex flex-wrap justify-end gap-2 pt-1">
@@ -279,7 +310,11 @@ function TicketDetail({
               <Button variant="secondary" onClick={() => onStatus('pending')}>
                 Mark pending
               </Button>
-            ) : null}
+            ) : (
+              <Button variant="secondary" onClick={() => onStatus('open')}>
+                Back to open
+              </Button>
+            )}
             <Button onClick={() => onStatus('resolved')}>Resolve</Button>
           </>
         ) : (

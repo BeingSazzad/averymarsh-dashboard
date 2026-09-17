@@ -107,6 +107,7 @@ export interface GrantAccessPayload {
 
 export interface SupportTicket {
   id: string
+  number: string
   companyId: string
   subject: string
   requester: string

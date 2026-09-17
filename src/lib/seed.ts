@@ -33,12 +33,10 @@ export const seedPlans: Plan[] = [
     description: 'Small crews running jobs from the site.',
     features: [
       'Daily field logs & punch list',
-      'Tasks and schedule on assigned jobs',
-      'Site photos & document upload',
+      'Tasks & schedule on assigned jobs',
+      'Site photos & documents',
       'Milestone tracker',
-      'Latti field insights (limited)',
       'Owner + PM + Field roles',
-      'Offline / field sync cache',
     ],
   },
   {
@@ -52,11 +50,8 @@ export const seedPlans: Plan[] = [
     features: [
       'Everything in Field',
       'Multiple projects & team invites',
-      'Project updates & team directory',
-      'Change orders (request + review)',
-      'Budget view & log expense',
+      'Change orders & budget view',
       'Plans / BuildScope documents',
-      'Weather impact on jobs',
       'Messages hub',
     ],
   },
@@ -70,13 +65,10 @@ export const seedPlans: Plan[] = [
     description: 'Full Lattice workspace for owners and finance.',
     features: [
       'Everything in Crew',
-      'Full budget ledger + presets',
-      'Pay apps, draws & lien waivers',
+      'Full budget ledger & pay apps',
       'Financial reports & P&L',
-      'Finance role seats',
-      'Company profile & subscription control',
-      'Lender / financing connections',
-      'Priority support tickets',
+      'Finance role + company controls',
+      'Priority support',
     ],
   },
 ]
@@ -285,6 +277,7 @@ export const seedNotifications: AppNotification[] = [
 export const seedTickets: SupportTicket[] = [
   {
     id: 'tkt-201',
+    number: 'TKT-201',
     companyId: 'co-1',
     subject: 'Owner locked out — need password reset',
     requester: 'avery@averymarsh.com',
@@ -296,6 +289,7 @@ export const seedTickets: SupportTicket[] = [
   },
   {
     id: 'tkt-202',
+    number: 'TKT-202',
     companyId: 'co-4',
     subject: 'Payment failed but card is valid',
     requester: 'dana@ridgeline.com',
@@ -307,6 +301,7 @@ export const seedTickets: SupportTicket[] = [
   },
   {
     id: 'tkt-203',
+    number: 'TKT-203',
     companyId: 'co-2',
     subject: 'Add 5 more seats mid-cycle',
     requester: 'omar@harborview.com',
@@ -318,6 +313,7 @@ export const seedTickets: SupportTicket[] = [
   },
   {
     id: 'tkt-204',
+    number: 'TKT-204',
     companyId: 'co-3',
     subject: 'Trial extension request',
     requester: 'elena@snellisle.com',
