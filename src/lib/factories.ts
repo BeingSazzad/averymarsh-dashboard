@@ -29,9 +29,9 @@ export function newAdmin(): Admin {
   }
 }
 
-export function nextTicketNumber(existing: { number: string }[]): string {
+export function nextTicketNumber(existing: { number?: string }[]): string {
   const nums = existing.map((ticket) => {
-    const match = ticket.number.match(/(\d+)$/)
+    const match = String(ticket.number ?? '').match(/(\d+)$/)
     return match ? Number(match[1]) : 0
   })
   const next = Math.max(200, ...nums, 0) + 1

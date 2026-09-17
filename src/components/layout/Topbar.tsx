@@ -1,12 +1,13 @@
 import { Bell, ChevronDown } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '../../constants/routes'
+import { readSession } from '../../hooks/useAuth'
 import { useAppSelector } from '../../store/hooks'
 import { Avatar } from '../shared/Avatar'
 import { MobileNav } from './Sidebar'
 
 export function Topbar() {
-  const session = useAppSelector((state) => state.platform.session)
+  const session = useAppSelector((state) => state.platform.session) ?? readSession()
   const admins = useAppSelector((state) => state.platform.admins)
   const unread = useAppSelector(
     (state) => state.platform.notifications.filter((note) => !note.read).length

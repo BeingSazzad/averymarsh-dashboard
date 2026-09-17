@@ -98,7 +98,7 @@ export function SupportPage() {
                 onClick={() => setViewing(ticket)}
               >
                 <Td className="font-semibold tabular-nums text-[#171A1F] whitespace-nowrap">
-                  {ticket.number}
+                  {ticket.number ?? ticket.id}
                 </Td>
                 <Td>
                   <p className="font-semibold text-[#171A1F]">{ticket.subject}</p>
